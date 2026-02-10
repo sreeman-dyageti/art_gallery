@@ -1,0 +1,7 @@
+<%- include("partials/header") %>
+<form class="post-form" action="/create" method="post">
+    <input type="text" placeholder="Post title" required>
+    <textarea name="content" id="content-area" maxlength="500" rows="5" placeholder="Descreption..." required></textarea>
+    <button type="submit">Publish</button>
+</form>
+<%- include("partials/footer") %>
