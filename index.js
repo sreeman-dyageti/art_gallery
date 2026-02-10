@@ -5,11 +5,10 @@ const app = express();
 const port = 3000;
 const posts=[];
 
-app.use(bodyParser.urlencoded({ extended: true }));
+
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
-
 app.set("view engine", "ejs");
 
 //home page ,All posts
@@ -31,6 +30,11 @@ posts.push({
   text:text,
   content:content
   });
+});
+
+//redirect home
+app.get("/home",(req,res)=>{
+  res.redirect('/');
 });
 
 
