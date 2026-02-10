@@ -11,10 +11,11 @@ app.use(express.static("public"));
 
 app.set("view engine", "ejs");
 
-
+//home page ,All posts
 app.get("/", (req, res) => {
-  res.render("/public/index.html");
+  res.render("index.ejs");
 });
+
 
 
 app.listen(port, () => {
