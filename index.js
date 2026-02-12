@@ -13,7 +13,7 @@ app.set("view engine", "ejs");
 
 //home page ,All posts
 app.get("/", (req, res) => {
-  res.render("index.ejs",{posts});
+  res.render("index",{posts});
 });
 
 
@@ -24,10 +24,10 @@ app.get("/new",(req,res)=>{
 
 //create post 
 app.post("/create",(req,res)=>{
-const{text,content}=req.body;
+const {title,content}=req.body;
 
 posts.push({
-  text,
+  title,
   content
   });
 
@@ -42,7 +42,7 @@ app.get("/home",(req,res)=>{
 //Edit and Update posts
 //edit page 
 app.get("/edit/:index",(req,res)=>{
-  const edit = req.params.id;
+  const index = req.params.index;
   const post = posts[index];
 
   if(!post){
@@ -52,18 +52,17 @@ app.get("/edit/:index",(req,res)=>{
 });
 
 //update post
-app.get("/update:index",(req,res)=>{
+app.post("/update/:index",(req,res)=>{
   const index= req.params.index;
 
   if(!posts[index]){
-    res.redirect('/');
+    return res.redirect('/');
   };
   posts[index]={
     title:req.body.title,
-    content:req.body.title
+    content:req.body.content
   }
   res.redirect('/');
-
 });
 
 

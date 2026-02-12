@@ -1,7 +1,32 @@
 <%- include("partials/header.ejs") %>
 <h2>All ART Posts</h2>
+
 <% if (posts.length ===0){ %>
    <h1>No Art Posts Yet, Create One</h1>
     <% } %>
-    
+<div class="post">
+    <% posts.forEach((post,index)=> { %>
+    <div class="post-card">     
+        <% if(post.image){%>
+        <img src="<%= post.image %>"
+        alt="post_image">
+        <% }else{%>
+        <img src="/img/default.jpg" alt="Default img">
+        
+      <div class="post-card-content">
+        <h2><%= post.title %></h2>
+        <p><%= post.content %></p>
+      </div>
+      <div class="actions">
+        <a href="/edit/<%= index %>">Edit</a>
+        <form action="/delete/<%=index %>" method="post">
+            <button type="submit">Delete</button>
+        </form>
+      </div>
+      <% } %>
+    </div>
+
+  <% }); %>
+</div>
+     
 <%- include("partials/footer.ejs") %>

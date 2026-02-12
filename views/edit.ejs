@@ -1,12 +1,9 @@
 <%- include("partials/header") %>
 
 <h1>Edit post</h1>
-<form class="post-form" action="/update/"<%= index %> method="post">
-
-    <input type="text" placeholder="Post title" required>
-    <textarea name="content" id="content-area" maxlength="500" rows="5" placeholder="Descreption..." required></textarea>
-    <button type="submit">Publish</button>
-
+<form class="post-form" action="/update/<%= index %>" method="POST">
+    <input type="text" name="title" value="<%= post.title %>"  placeholder="Post title" required>
+    <textarea name="content" id="content-area" maxlength="500" rows="5"  placeholder="Descreption..." required><%= post.content %></textarea>
     <button type="submit">Edit</button>
 </form>
 
