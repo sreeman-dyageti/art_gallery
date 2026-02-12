@@ -65,6 +65,19 @@ app.post("/update/:index",(req,res)=>{
   res.redirect('/');
 });
 
+//Delete post
+app.post("/delete/:index",(req,res)=>{
+  const index=req.params.index;
+
+  if(posts[index]){
+    posts.splice(index,1);
+  }
+  res.redirect('/');
+});
+
+app.use((req, res) => {
+  res.status(404).send("404 - Page Not Found");
+});
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
