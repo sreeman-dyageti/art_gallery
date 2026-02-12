@@ -27,14 +27,43 @@ app.post("/create",(req,res)=>{
 const{text,content}=req.body;
 
 posts.push({
-  text:text,
-  content:content
+  text,
+  content
   });
+
+  res.redirect('/');
 });
 
 //redirect home
 app.get("/home",(req,res)=>{
   res.redirect('/');
+});
+
+//Edit and Update posts
+//edit page 
+app.get("/edit/:index",(req,res)=>{
+  const edit = req.params.id;
+  const post = posts[index];
+
+  if(!post){
+    return res.send("no post was found");
+  }
+  res.render("edit",{post,index});
+});
+
+//update post
+app.get("/update:index",(req,res)=>{
+  const index= req.params.index;
+
+  if(!posts[index]){
+    res.redirect('/');
+  };
+  posts[index]={
+    title:req.body.title,
+    content:req.body.title
+  }
+  res.redirect('/');
+
 });
 
 
