@@ -233,3 +233,95 @@ h1,h2{
     color: white;
     transform: scale(0.98);
 }
+
+/* emptyState */
+h1:only-child{
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--gray-600);
+    margin: 4rem 0;
+    animation: float 4s ease-in-out infinite;
+}
+
+/* form styles (edit & create)*/
+.post-form {
+    max-width: 700px;
+    margin: 2rem auto;
+    padding: 2.5rem;
+    background: var(--white);
+    border-radius: 2rem;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    border: 1px solid var(--gray-200);
+    animation: scaleIn 0.6s ease-out;
+    transition: var(--transition);
+}
+
+.post-form:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: var(--light-blue);
+}
+
+.post-form input,
+.post-form textarea {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid var(--gray-200);
+    border-radius: 1rem;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: var(--transition);
+    background: var(--off-white);
+    color: var(--gray-800);
+}
+
+.post-form input:focus,
+.post-form textarea:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    background: var(--white);
+    box-shadow: 0 0 0 4px var(--light-blue);
+    animation: borderPulse 2s infinite;
+}
+
+.post-form input::placeholder,
+.post-form textarea::placeholder {
+    color: var(--gray-600);
+    opacity: 0.7;
+}
+
+.post-form textarea {
+    resize: vertical;
+    min-height: 150px;
+    line-height: 1.6;
+}
+
+.post-form button {
+    background: linear-gradient(135deg, var(--primary-blue), var(--primary-dark));
+    color: white;
+    border: none;
+    padding: 1rem 1.5rem;
+    border-radius: 9999px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 1px solid transparent;
+    margin-top: 0.5rem;
+}
+
+.post-form button:hover {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-blue));
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+    border-color: var(--white);
+}
+
+.post-form button:active {
+    transform: scale(0.98);
+}
