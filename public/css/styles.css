@@ -12,7 +12,7 @@ body{
     min-height:100vh;
     display: flex;
     flex-direction: column;
-    animation: fadeIn 0.8s ease-out;
+    animation: fadeIn 0.6s ease-out;
 }
 
 
@@ -93,7 +93,7 @@ body{
 .logo-icon{
     font-size: 2rem;
     color: var(--primary-blue);
-    animation:float 4s ease-in-out infinite;
+    animation:float 5s ease-in-out infinite;
 }
 
 .logo-text{
@@ -528,3 +528,79 @@ h1:only-child{
         gap: 1rem;
     }
 }
+
+.container{
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* scrollbar */
+::-webkit-scrollbar-track{
+    background: var(--gray-100);
+}
+::-webkit-scrollbar-thumb:hover{
+    background: linear-gradient(var(--light-blue),var(--primary-blue));
+    border-radius: 6px;
+    border: 3px solid var(--gray-100);
+}
+::-webkit-scrollbar-thumb{
+    background: linear-gradient(var(--light-blue),var(--primary-blue));
+    border-radius: 6px;
+    border: 3px solid var(--gray-100);
+}
+::-webkit-scrollbar-thumb:hover{
+    background: linear-gradient(var(--primary-blue),var(--primary-dark));
+}
+
+:focus-visible {
+    outline: 3px solid var(--primary-blue);
+    outline-offset: 2px;
+}
+
+/*  ANIMATION DELAYS FOR CARDS  */
+.post-card:nth-child(1) { animation-delay: 0.1s; }
+.post-card:nth-child(2) { animation-delay: 0.2s; }
+.post-card:nth-child(3) { animation-delay: 0.3s; }
+.post-card:nth-child(4) { animation-delay: 0.4s; }
+.post-card:nth-child(5) { animation-delay: 0.5s; }
+.post-card:nth-child(6) { animation-delay: 0.6s; }
+
+/*  ADDITIONAL POLISH  */
+/* Style for the page when no posts exist */
+body:has(h1:only-child) .post {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+}
+
+/* Smooth transitions for all interactive elements */
+a, button, input, textarea {
+    transition: var(--transition);
+}
+
+/* Better focus visibility for form elements */
+.post-form input:focus-visible,
+.post-form textarea:focus-visible {
+    outline: 3px solid var(--primary-blue);
+    outline-offset: 2px;
+}
+
+/* ===== PRINT STYLES (optional) ===== */
+@media print {
+    .topbar, .footer, .actions, .post-form button {
+        display: none;
+    }
+    
+    body {
+        background: white;
+    }
+    
+    .post-card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+}
+
