@@ -15,6 +15,9 @@ body{
     animation: fadeIn 0.6s ease-out;
 }
 
+p{
+    margin-left: 19rem;
+}
 
 /* animations */
 @keyframes fadeIn {
@@ -587,7 +590,7 @@ a, button, input, textarea {
     outline-offset: 2px;
 }
 
-/* ===== PRINT STYLES (optional) ===== */
+/* ===== PRINT STYLES  ===== */
 @media print {
     .topbar, .footer, .actions, .post-form button {
         display: none;

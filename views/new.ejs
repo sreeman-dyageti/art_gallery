@@ -2,7 +2,11 @@
 <h2>Create new post</h2>
 <form class="post-form" action="/create" method="post">
     <input type="text" name="title" placeholder="Post title" required>
+    
     <textarea name="content" id="content-area" maxlength="500" rows="5" placeholder="Descreption..." required></textarea>
+    <p id="charCount">0 / 500</p>
+    <input type="file" name="image" accept="image/*">
+    
     <button type="submit">Publish</button>
 </form>
 <%- include("partials/footer") %>

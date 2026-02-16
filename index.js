@@ -1,10 +1,23 @@
 import express from "express";
 import bodyParser from "body-parser";
+import multer from "multer";
+import path from "path";
 
 const app = express();
 const port = 3000;
 const posts=[];
 
+// for storage middleware
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/uploads");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage });
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -28,7 +41,8 @@ const {title,content}=req.body;
 
 posts.push({
   title,
-  content
+  content,
+  image: req.file ? `/uploads/${req.file.filename}` : null
   });
 
   res.redirect('/');
@@ -60,7 +74,10 @@ app.post("/update/:index",(req,res)=>{
   };
   posts[index]={
     title:req.body.title,
-    content:req.body.content
+    content:req.body.content,
+    image: req.file
+      ? `/uploads/${req.file.filename}`   
+      : req.body.existingImage 
   }
   res.redirect('/');
 });
