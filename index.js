@@ -36,7 +36,7 @@ app.get("/new",(req,res)=>{
 });
 
 //create post 
-app.post("/create",(req,res)=>{
+app.post("/create",upload.single("image"),(req,res)=>{
 const {title,content}=req.body;
 
 posts.push({
@@ -66,7 +66,7 @@ app.get("/edit/:index",(req,res)=>{
 });
 
 //update post
-app.post("/update/:index",(req,res)=>{
+app.post("/update/:index",upload.single("image"),(req,res)=>{
   const index= req.params.index;
 
   if(!posts[index]){
@@ -78,7 +78,7 @@ app.post("/update/:index",(req,res)=>{
     image: req.file
       ? `/uploads/${req.file.filename}`   
       : req.body.existingImage 
-  }
+  };
   res.redirect('/');
 });
 

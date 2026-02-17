@@ -1,6 +1,6 @@
 <%- include("partials/header") %>
 <h2>Create new post</h2>
-<form class="post-form" action="/create" method="post">
+<form class="post-form" action="/create" method="post" enctype="multipart/form-data">
     <input type="text" name="title" placeholder="Post title" required>
     
     <textarea name="content" id="content-area" maxlength="500" rows="5" placeholder="Descreption..." required></textarea>

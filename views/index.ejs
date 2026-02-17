@@ -8,10 +8,10 @@
     <% posts.forEach((post,index)=> { %>
     <div class="post-card">     
         <% if(post.image){%>
-        <img src="<%= post.image %>"
-        alt="post_image">
+        <img src="<%= post.image %>" alt="post_image">
         <% }else{%>
         <img src="/img/default.jpg" alt="Default img">
+        <% } %>
         
       <div class="post-card-content">
         <h2><%= post.title %></h2>
@@ -24,10 +24,10 @@
             <button type="submit">Delete</button>
         </form>
       </div>
-      <% } %>
     </div>
-
-  <% }); %>
 </div>
+
+<% }); %>
+
      
 <%- include("partials/footer.ejs") %>

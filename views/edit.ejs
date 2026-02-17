@@ -1,9 +1,14 @@
 <%- include("partials/header") %>
 
 <h1>Edit post</h1>
-<form class="post-form" action="/update/<%= index %>" method="POST">
+<form class="post-form" action="/update/<%= index %>" method="POST" enctype="multipart/form-data">
     <input type="text" name="title" value="<%= post.title %>"  placeholder="Post title" required>
     <textarea name="content" id="content-area" maxlength="500" rows="5"  placeholder="Descreption..." required><%= post.content %></textarea>
+    <input type="file" name="image" accept="image/*">
+    <% if(post.image){ %>
+        <p>Current image: <img src="<%= post.image %>" alt="current" style="max-width: 100px;"></p>
+        <input type="hidden" name="existingImage" value="<%= post.image %>">
+    <% } %>
     <button type="submit">Edit</button>
 </form>
 
