@@ -13,10 +13,26 @@ body{
     display: flex;
     flex-direction: column;
     animation: fadeIn 0.6s ease-out;
+    transition: background 0.3s ease, color 0.3s ease;
+
 }
 
 p{
     margin-left: 19rem;
+}
+/* dark mode */
+
+body.dark {
+    --white: #0f172a;
+    --off-white: #1e293b;
+    --soft-blue: #0b1220;
+    --gray-100: #1e293b;
+    --gray-200: #334155;
+    --gray-600: #cbd5e1;
+    --gray-800: #f1f5f9;
+
+    background: linear-gradient(145deg, #0f172a, #020617);
+    color: var(--gray-800);
 }
 
 /* animations */
@@ -80,6 +96,11 @@ p{
     top: 0;
     z-index: 100;
     animation: slideIn 0.6s ease-out;
+}
+
+body.dark .topbar {
+    background: rgba(15, 23, 42, 0.9);
+    border-bottom: 2px solid #334155;
 }
 
 .topbar-left{
@@ -160,7 +181,7 @@ h1,h2{
     grid-template-columns: repeat(auto-fill,minmax(320px,1fr));
     gap:2rem;
     padding: 2rem;
-    max-width: 140px;
+    max-width: 1400px;
     margin: 0 auto;
     width: 100%;
 }
@@ -176,7 +197,18 @@ h1,h2{
     animation: scaleIn 0.5s ease-out;
     animation-fill-mode: both;
 }
+body.dark .post-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+}
+body.dark .post-card-content h2 {
+    color: #f1f5f9;
+}
 
+body.dark .actions {
+    background: #0f172a;
+    border-top: 1px solid #334155;
+}
 .post-card:hover{
     transform: translateY(-6px);
     box-shadow: var(--shadow-lg);
@@ -290,6 +322,22 @@ h1:only-child{
     animation: scaleIn 0.6s ease-out;
     transition: var(--transition);
 }
+body.dark .post-form {
+    background: #1e293b;
+    border: 1px solid #334155;
+}
+
+body.dark .post-form input,
+body.dark .post-form textarea {
+    background: #0f172a;
+    border: 2px solid #334155;
+    color: #f1f5f9;
+}
+
+body.dark .post-form input::placeholder,
+body.dark .post-form textarea::placeholder {
+    color: #94a3b8;
+}
 
 .post-form:hover {
     box-shadow: var(--shadow-lg);
@@ -362,6 +410,16 @@ h1:only-child{
     position: relative;
 }
 /* footer Styles */
+
+body.dark .footer {
+    background: #0f172a;
+    border-top: 2px solid #334155;
+}
+
+body.dark .footer-text,
+body.dark .footer-copy {
+    color: #cbd5e1;
+}
 .footer{
     background: var(--white);
     border-top: 2pt solid var(--light-blue);
@@ -559,6 +617,14 @@ h1:only-child{
 :focus-visible {
     outline: 3px solid var(--primary-blue);
     outline-offset: 2px;
+}
+body.dark ::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+body.dark ::-webkit-scrollbar-thumb {
+    background: linear-gradient(#334155, #1e293b);
+    border: 3px solid #0f172a;
 }
 
 /*  ANIMATION DELAYS FOR CARDS  */
