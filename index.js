@@ -28,8 +28,17 @@ app.set("view engine", "ejs");
 app.get("/", (req, res) => {
   res.render("index",{posts});
 });
+// Show single post
+app.get("/posts/:index", (req, res) => {
+  const index = req.params.index;
+  const post = posts[index];
 
+  if (!post) {
+    return res.redirect("/");
+  }
 
+  res.render("show", { post, index });
+});
 // show create post page 
 app.get("/new",(req,res)=>{
   res.render("new");
