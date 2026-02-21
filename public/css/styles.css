@@ -468,7 +468,7 @@ body.dark .footer-copy {
 
 .footer-links {
     display: flex;
-    gap: 2.5rem;
+    gap: 1.5rem;
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
@@ -486,18 +486,19 @@ body.dark .footer-copy {
     text-decoration: none;
 }
 
+
 .footer-links a:hover {
     transform: translateY(-3px);
     color: var(--primary-blue) !important;
 }
 
 .footer-links i {
-    font-size: 1.75rem !important;
+    font-size: 1.6rem;
     transition: var(--transition);
 }
 
 .footer-links a:hover i {
-    transform: scale(1.1);
+     transform: scale(1.15);
     color: var(--primary-blue);
 }
 
