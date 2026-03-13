@@ -2,35 +2,42 @@ import express from "express";
 import bodyParser from "body-parser";
 import multer from "multer";
 import path from "path";
+import { fileURLToPath } from "url";
 
-const app = express();
-const port = 3000;
-const posts=[];
+const __filename = fileURLToPath(import.meta.url);
+const __dirname  = path.dirname(__filename);
+
+const app   = express();
+const port  = 3000;
+const posts = [];
 
 // for storage middleware
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "public/uploads");
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
+  destination: (req, file, cb) => cb(null, "public/uploads"),
+  filename:    (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)),
 });
-
 const upload = multer({ storage });
 
-
+// middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.set("view engine", "ejs");
+app.set("views",path.join(__dirname,"views"));
 
+// routes
 //home page ,All posts
 app.get("/", (req, res) => {
   res.render("index",{posts});
 });
+
+//redirect home
+app.get("/home",(req,res)=>{
+  res.redirect('/');
+});
+
 // Show single post
 app.get("/posts/:index", (req, res) => {
-  const index = req.params.index;
+  const index = parseInt(req.params.index);
   const post = posts[index];
 
   if (!post) {
@@ -39,6 +46,7 @@ app.get("/posts/:index", (req, res) => {
 
   res.render("show", { post, index });
 });
+
 // show create post page 
 app.get("/new",(req,res)=>{
   res.render("new");
@@ -51,16 +59,13 @@ const {title,content}=req.body;
 posts.push({
   title,
   content,
-  image: req.file ? `/uploads/${req.file.filename}` : null
+  image: req.file ? `/uploads/${req.file.filename}` : null,
+  createdAt: new Date(),
   });
 
-  res.redirect('/');
+  res.redirect("/");
 });
 
-//redirect home
-app.get("/home",(req,res)=>{
-  res.redirect('/');
-});
 
 //Edit and Update posts
 //edit page 
@@ -69,38 +74,41 @@ app.get("/edit/:index",(req,res)=>{
   const post = posts[index];
 
   if(!post){
-    return res.send("no post was found");
+    return res.redirect("/");
   }
   res.render("edit",{post,index});
 });
 
 //update post
 app.post("/update/:index",upload.single("image"),(req,res)=>{
-  const index= req.params.index;
+  const index= parseInt(req.params.index);
 
   if(!posts[index]){
-    return res.redirect('/');
+    return res.redirect("/");
   };
   posts[index]={
     title:req.body.title,
     content:req.body.content,
-    image: req.file
+    image: req.file 
       ? `/uploads/${req.file.filename}`   
-      : req.body.existingImage 
+      : (req.body.existingImage || null ),
+    createdAt: posts[index].createdAt,
+    uploadAt:new Date(),
   };
-  res.redirect('/');
+  res.redirect("/");
 });
 
 //Delete post
 app.post("/delete/:index",(req,res)=>{
-  const index=req.params.index;
+  const index= parseInt(req.params.index);
 
   if(posts[index]){
     posts.splice(index,1);
   }
-  res.redirect('/');
+  res.redirect("/");
 });
 
+// 404
 app.use((req, res) => {
   res.status(404).send("404 - Page Not Found");
 });
