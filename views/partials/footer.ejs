@@ -1,31 +1,30 @@
 </main>
+
 <footer class="footer">
-  <div class="footer-content">
+  <div class="footer-inner">
     <div class="footer-brand">
-      <span class="footer-logo">✦</span>
-      <span class="footer-name">Art Gallery</span>
+      <span class="footer-diamond">◆</span>
+      <span class="footer-name">Artfolio</span>
     </div>
+  <p class="footer-text">
+   A space for artists to share their creative journey, step by step.
+   </p>
 
-    <p class="footer-text">
-      Built with Node.js, Express & EJS · Designed for performance & clarity
-    </p>
-
-    <div class="footer-links">
-      <a href="/">
-      <i class="fi fi-sr-home"></i>
-      
-    </a>
-      <a href="/new"   style="text-decoration: none"><i class="fi fi-rr-pencil"></i>
-        
-      </a>
-      <a href="https://github.com/sreeman-d/Blog-project" target="_blank"  style="text-decoration: none; color: inherit;"><i class="fi fi-brands-github"  style="font-size:30px;"></i>
-      </a>
-    </div>
-
-    <p class="footer-copy">
-      © <%= new Date().getFullYear() %> Art Gallery. All rights reserved.
-    </p>
-  </div>
+<div class="footer-links">
+ <a href="/" class="footer-link" title="Home">
+    <i class="fi fi-sr-home"></i>
+   </a>
+  <a href="/new" class="footer-link" title="New Post">
+     <i class="fi fi-rr-pencil"></i>
+ </a>
+<a href="https://github.com/sreeman-d/Blog-project" target="_blank" class="footer-link" title="GitHub">
+    <i class="fi fi-brands-github"></i>
+</a>
+</div>
+<p class="footer-copy">
+    © <%= new Date().getFullYear() %> Artfolio · Built with Node.js, Express & EJS
+  </p>
+</div>
 </footer>
 <script src="/js/main.js"></script>
 
