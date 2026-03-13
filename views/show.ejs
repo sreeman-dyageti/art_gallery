@@ -1,24 +1,52 @@
 <%- include("partials/header.ejs") %>
 
-<div class="single-post">
-    <% if(post.image){ %>
-        <img src="<%= post.image %>" alt="post_image">
-    <% } else { %>
-        <img src="/img/default.jpg" alt="Default img">
-    <% } %>
+<div class="show-container">
+    <a href="/" class="back-link">
+        <i class="fi fi-rr-arrow-left"></i> Back to Gallery
+    </a>
 
-    <div class="post-details">
-        <h2><%= post.title %></h2>
-        <p><%= post.content %></p>
-
-        <div class="post-actions">
-            <a href="/edit/<%= index %>">Edit</a>
-
-            <form action="/delete/<%= index %>" method="post">
-                <button type="submit">Delete</button>
-            </form>
+    <article class="show-card">
+        <div class="show-image-wrap">
+            <% const hasValidImage = post.image && post.image !== 'undefined' && post.image !== 'null'; %>
+            <% if (hasValidImage) { %>
+                <img src="<%= post.image %>" alt="<%= post.title %>" class="show-img">
+            <% } else { %>
+                <img src="/img/default.jpg" alt="Default img" class="show-img">
+            <% } %>
         </div>
-    </div>
+
+        <div class="show-details">
+            <div class="show-badge">Artwork</div>
+            <h1 class="show-title"><%= post.title %></h1>
+
+            <div class="show-divider"></div>
+
+            <div class="show-content-wrap">
+                <p class="show-label">Artist's Note</p>
+                <p class="show-content"><%= post.content %></p>
+            </div>
+
+            <div class="show-meta">
+                <span class="meta-tag">
+                    <i class="fi fi-rr-palette"></i> Creative Work
+                </span>
+                <span class="meta-tag">
+                    <i class="fi fi-rr-eye"></i> Portfolio
+                </span>
+            </div>
+
+            <div class="show-actions">
+                <a href="/edit/<%= index %>" class="btn-primary">
+                    <i class="fi fi-rr-pencil"></i> Edit Post
+                </a>
+                <form action="/delete/<%= index %>" method="post">
+                    <button type="submit" class="btn-danger">
+                        <i class="fi fi-rr-trash"></i> Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </article>
 </div>
 
 <%- include("partials/footer.ejs") %>

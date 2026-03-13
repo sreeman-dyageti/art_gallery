@@ -21,7 +21,8 @@
     <% posts.forEach((post, index) => { %>
     <div class="pin-card" data-index="<%= index %>">
         <a href="/posts/<%= index %>" class="pin-image-wrap">
-      <% if (post.image) { %>
+      <% const hasValidImage = post.image && post.image !== 'undefined' && post.image !== 'null'; %>
+      <% if (hasValidImage) { %>
     <img src="<%= post.image %>" alt="<%= post.title %>" class="pin-img" loading="lazy">
      <% } else { %>
                 <div class="pin-placeholder">
