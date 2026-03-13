@@ -3,31 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Art Gallery</title>
+    <title>Artfolio – Showcase Your Creative Process</title>
     <link rel="stylesheet" href="/css/styles.css">
-<!-- Regular Icons -->
-<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
-<!-- Solid Icons -->
-<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css">
-<!-- Brands -->
-<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-brands/css/uicons-brands.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css">
+    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-brands/css/uicons-brands.css">
 </head>
 <body>
-    
-<header class="topbar">
-    <div class="topbar-left">
-        <div class="logo">
-            <span class="logo-icon">✦</span>
-            <span class="logo-text">Art Gallery</span>
-        </div>
-    </div>
 
-<div class="topbar-nav">
-<a href="/home">Home</a>
-<a href="/new">New Post</a>
- <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
-  🌙
-</button>
-</div>
+<header class="topbar">
+    <a href="/" class="logo-link">
+        <div class="logo">
+            <div class="logo-mark">
+                <span class="logo-diamond">◆</span>
+            </div>
+            <div class="logo-type">
+                <span class="logo-text">Artfolio</span>
+                <span class="logo-tagline">Creative Portfolio</span>
+            </div>
+        </div>
+    </a>
+
+    <nav class="topbar-nav">
+        <a href="/" class="nav-link">
+            <i class="fi fi-rr-home"></i>
+            <span>Explore</span>
+        </a>
+        <a href="/new" class="nav-link nav-cta">
+            <i class="fi fi-rr-plus"></i>
+            <span>New Post</span>
+        </a>
+        <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+            <span class="toggle-icon">🌙</span>
+        </button>
+    </nav>
 </header>
-<main class="container">
+
+<main class="main-content">
