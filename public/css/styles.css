@@ -50,7 +50,7 @@
     --header-h: 68px;
 }
 
-/* --- DARK MODE --- */
+/* DARK MODE */
 body.dark {
     --cream:        #141210;
     --warm-white:   #1c1917;
@@ -78,7 +78,7 @@ body.dark {
     --shadow-pin:   0 4px 20px rgba(0,0,0,.45);
 }
 
-/* --- RESET & BASE --- */
+/* -RESET & BASE  */
 *, *::before, *::after {
     margin: 0; padding: 0;
     box-sizing: border-box;
@@ -105,7 +105,7 @@ img { display: block; max-width: 100%; }
 a { color: inherit; text-decoration: none; }
 button, input, textarea, select { font-family: var(--font-body); }
 
-/* --- SCROLLBAR --- */
+/*  SCROLLBAR  */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--surface-2); }
 ::-webkit-scrollbar-thumb {
@@ -115,7 +115,7 @@ button, input, textarea, select { font-family: var(--font-body); }
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); }
 
-/* --- ANIMATIONS --- */
+/*  ANIMATIONS */
 @keyframes fadeUp {
     from { opacity: 0; transform: translateY(18px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -137,9 +137,7 @@ button, input, textarea, select { font-family: var(--font-body); }
     100% { background-position: 200% 0; }
 }
 
-/* =============================================
-   HEADER / TOPBAR
-   ============================================= */
+/* HEADER / TOPBAR*/
 .topbar {
     position: sticky;
     top: 0;
