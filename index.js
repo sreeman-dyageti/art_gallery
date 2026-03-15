@@ -3,6 +3,8 @@ import bodyParser from "body-parser";
 import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
+import env from "dotenv";
+import pg from "pg";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
@@ -10,6 +12,7 @@ const __dirname  = path.dirname(__filename);
 const app   = express();
 const port  = 3000;
 const posts = [];
+env.config();
 
 // for storage middleware
 const storage = multer.diskStorage({
@@ -23,6 +26,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.set("views",path.join(__dirname,"views"));
+
+// pg connection
+const db = new pg.Client({
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: process.env.PG_PORT,
+});
+db.connect();
 
 // routes
 //home page ,All posts
