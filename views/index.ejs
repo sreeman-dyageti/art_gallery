@@ -2,7 +2,6 @@
 
 <% if (posts.length === 0) { %>
 <div class="empty-state">
- <div class="empty-icon">🎨</div>
  <h2 class="empty-title">The gallery is waiting for you</h2>
    <p class="empty-sub">Share your first artwork and start building your creative portfolio.</p>
    <a href="/new" class="btn-primary">
@@ -40,10 +39,10 @@
         </div>
 
         <div class="pin-actions">
-            <a href="/edit/<%= index %>" class="pin-btn pin-btn-edit">
+            <a href="/edit/<%= post.id %>" class="pin-btn pin-btn-edit">
                 <i class="fi fi-rr-pencil"></i> Edit
             </a>
-            <form action="/delete/<%= index %>" method="post" class="inline-form">
+            <form action="/delete/<%= post.id %>" method="post" class="inline-form">
                 <button type="submit" class="pin-btn pin-btn-delete">
                     <i class="fi fi-rr-trash"></i> Delete
                 </button>

@@ -50,7 +50,9 @@ db.connect();
 
 // routes
 //home page, All posts
-app.get("/", (req, res) => {
+app.get("/",async (req, res) => {
+  const result = await db.query("SELECT * FROM posts");
+  const posts = result.rows;
   res.render("index",{posts});
 });
 
