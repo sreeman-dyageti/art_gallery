@@ -4,6 +4,11 @@ import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
 import env from "dotenv";
+import bcrypt from "bcrypt";
+import session from "express-session";
+import passport from "passport";
+import { Strategy } from "passport-local";
+import GoogleStrategy from "passport-google-oauth2";
 import pg from "pg";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -26,6 +31,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.set("views",path.join(__dirname,"views"));
+app.use (session({
+ secret:process.env.SESSION_SECRET,
+ saveUninitialized:true,
+ resave: false
+}
+));
 
 // pg connection
 const db = new pg.Client({
@@ -38,7 +49,7 @@ const db = new pg.Client({
 db.connect();
 
 // routes
-//home page ,All posts
+//home page, All posts
 app.get("/", (req, res) => {
   res.render("index",{posts});
 });
