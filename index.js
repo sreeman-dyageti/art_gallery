@@ -77,22 +77,23 @@ app.get("/new",(req,res)=>{
 });
 
 //create post 
-app.post("/create",upload.single("image"),(req,res)=>{
-const {title,content}=req.body;
+app.post("/create",upload.single("image"), async (req,res)=>{
+  try {
+    const {title,content}=req.body;
+    const createdAt = new Date();
+    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+    const result =await db.query("INSERT INTO posts (title, content, image, created_at) VALUES ($1,$2,$3,$4)  RETURNING *",
+  [title, content, imagePath, createdAt ]
+);
 
-posts.push({
-  title,
-  content,
-  image: req.file ? `/uploads/${req.file.filename}` : null,
-  createdAt: new Date(),
-  });
-
-  res.redirect("/");
+res.redirect("/");
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 
 //Edit and Update posts
-//edit page 
 app.get("/edit/:index",(req,res)=>{
   const index = req.params.index;
   const post = posts[index];
