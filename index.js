@@ -1,23 +1,19 @@
-import express from "express";
-import bodyParser from "body-parser";
-import multer from "multer";
-import path from "path";
+import express      from "express";
+import bodyParser   from "body-parser";
+import { upload, cloudinary } from "./cloudinary.js";
+import path         from "path";
 import { fileURLToPath } from "url";
-import env from "dotenv";
-import bcrypt from "bcrypt";
-import session from "express-session";
-import passport from "passport";
-import { Strategy } from "passport-local";
-import GoogleStrategy from "passport-google-oauth2";
-import pg from "pg";
+import dotenv       from "dotenv";
+import session      from "express-session";
+import pg           from "pg";
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 
 const app   = express();
-const port  = 3000;
-const posts = [];
-env.config();
+const port  = process.env.PORT || 3000;
 
 // for storage middleware
 const storage = multer.diskStorage({
