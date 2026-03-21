@@ -89,42 +89,61 @@ app.get("/new",(req,res)=>{
 });
 
 //create post 
-app.post("/create", upload.single("image"), async (req, res) => {
+app.post("/create", upload.fields([
+  { name: "image", maxCount: 1 },
+  { name: "processImages", maxCount: 10 }
+]), async (req, res) => {
   try {
     const { title, content } = req.body;
     const createdAt = new Date();
 
-    let imagePath = null;
+    // MAIN IMAGE
+    let mainImageUrl = null;
 
-    if (req.file) {
-      const result = await cloudinary.uploader.upload_stream(
-        { folder: "artfolio" },
-        async (error, result) => {
-          if (error) {
-            console.log(error);
-            return res.redirect("/new");
+    if (req.files["image"]) {
+      const file = req.files["image"][0];
+
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "artfolio/main" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
           }
+        );
+        stream.end(file.buffer);
+      });
 
-          imagePath = result.secure_url;
-
-          await db.query(
-            "INSERT INTO posts (title, content, image, created_at) VALUES ($1,$2,$3,$4)",
-            [title, content, imagePath, createdAt]
-          );
-
-          res.redirect("/");
-        }
-      );
-
-      result.end(req.file.buffer);
-    } else {
-      await db.query(
-        "INSERT INTO posts (title, content, image, created_at) VALUES ($1,$2,$3,$4)",
-        [title, content, null, createdAt]
-      );
-
-      res.redirect("/");
+      mainImageUrl = result.secure_url;
     }
+
+    // PROCESS IMAGES
+    let processImageUrls = [];
+
+    if (req.files["processImages"]) {
+      for (let file of req.files["processImages"]) {
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "artfolio/process" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          stream.end(file.buffer);
+        });
+
+        processImageUrls.push(result.secure_url);
+      }
+    }
+
+    // SAVE TO DB
+    await db.query(
+      "INSERT INTO posts (title, content, image, process_images, created_at) VALUES ($1,$2,$3,$4,$5)",
+      [title, content, mainImageUrl, JSON.stringify(processImageUrls), createdAt]
+    );
+
+    res.redirect("/");
   } catch (error) {
     console.log(error);
   }

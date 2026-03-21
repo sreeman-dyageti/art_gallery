@@ -35,19 +35,21 @@
         </div>
 
         <div class="field-group">
-            <label class="field-label">Artwork Image</label>
-            <label class="file-drop" for="image-upload" id="dropZone">
-                <p class="drop-text">Click to upload or drag & drop</p>
-                <p class="drop-hint">JPG, PNG, GIF, WEBP supported</p>
-                <div class="drop-preview" id="imagePreview"></div>
+            <label class="field-label">Process Images</label>
+
+            <label class="file-drop" for="process-upload" id="processDropZone">
+                <p class="drop-text">Upload your drawing steps</p>
+                <p class="drop-hint">You can select multiple images to show your process</p>
+                <div class="drop-preview" id="processPreview"></div>
             </label>
-            <input 
-                type="file" 
-                id="image-upload"
-                name="image" 
+
+            <input
+                type="file"
+                id="process-upload"
+                name="processImages"
                 accept="image/*"
                 class="file-input-hidden"
-                required
+                multiple
             >
         </div>
 
