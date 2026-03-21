@@ -1,11 +1,14 @@
 import express      from "express";
 import bodyParser   from "body-parser";
-import { upload, cloudinary } from "./cloudinary.js";
+import cloudinary from "./cloudinary.js";
 import path         from "path";
 import { fileURLToPath } from "url";
 import dotenv       from "dotenv";
 import session      from "express-session";
 import pg           from "pg";
+import multer from "multer";
+
+
 
 dotenv.config();
 
@@ -15,11 +18,7 @@ const __dirname  = path.dirname(__filename);
 const app   = express();
 const port  = process.env.PORT || 3000;
 
-// for storage middleware
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "public/uploads"),
-  filename:    (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)),
-});
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 // pg connection
@@ -90,16 +89,42 @@ app.get("/new",(req,res)=>{
 });
 
 //create post 
-app.post("/create",upload.single("image"), async (req,res)=>{
+app.post("/create", upload.single("image"), async (req, res) => {
   try {
-    const {title,content}=req.body;
+    const { title, content } = req.body;
     const createdAt = new Date();
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
-    await db.query("INSERT INTO posts (title, content, image, created_at) VALUES ($1,$2,$3,$4) ",
-  [title, content, imagePath, createdAt ]
-);
 
-res.redirect("/");
+    let imagePath = null;
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload_stream(
+        { folder: "artfolio" },
+        async (error, result) => {
+          if (error) {
+            console.log(error);
+            return res.redirect("/new");
+          }
+
+          imagePath = result.secure_url;
+
+          await db.query(
+            "INSERT INTO posts (title, content, image, created_at) VALUES ($1,$2,$3,$4)",
+            [title, content, imagePath, createdAt]
+          );
+
+          res.redirect("/");
+        }
+      );
+
+      result.end(req.file.buffer);
+    } else {
+      await db.query(
+        "INSERT INTO posts (title, content, image, created_at) VALUES ($1,$2,$3,$4)",
+        [title, content, null, createdAt]
+      );
+
+      res.redirect("/");
+    }
   } catch (error) {
     console.log(error);
   }

@@ -1,7 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
-import multer from "multer";
 import dotenv from "dotenv";
+
 dotenv.config();
 
 cloudinary.config({
@@ -10,14 +9,4 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder:          "artfolio",
-    allowed_formats: ["jpg", "jpeg", "png", "gif", "webp"],
-    transformation:  [{ quality: "auto", fetch_format: "auto" }],
-  },
-});
-
-export const upload    = multer({ storage });
-export { cloudinary };
+export default cloudinary;
