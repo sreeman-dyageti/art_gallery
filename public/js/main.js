@@ -61,7 +61,7 @@ function showPreview(file) {
     const reader = new FileReader();
     reader.onload = e => {
         if (preview) {
-            preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+           preview.innerHTML = `<img src="${e.target.result}" alt="Main Image">`;
         }
         if (dropZone) {
             const text = dropZone.querySelector(".drop-text");
@@ -111,3 +111,35 @@ document.querySelectorAll(".logo-link").forEach(link => {
         }
     });
 });
+// --- PROCESS IMAGES PREVIEW (MULTIPLE) ---
+const processInput = document.getElementById("process-upload");
+const processPreview = document.getElementById("processPreview");
+
+if (processInput && processPreview) {
+    processInput.addEventListener("change", () => {
+        processPreview.innerHTML = ""; // clear old previews
+
+        const files = processInput.files;
+
+        Array.from(files).forEach(file => {
+            if (!file.type.startsWith("image/")) return;
+
+            const reader = new FileReader();
+
+            reader.onload = e => {
+                const img = document.createElement("img");
+                img.src = e.target.result;
+
+                img.style.width = "100%";
+                img.style.height = "90px";
+                img.style.objectFit = "cover";
+                img.style.borderRadius = "8px";
+                img.style.margin = "5px";
+
+                processPreview.appendChild(img);
+            };
+
+            reader.readAsDataURL(file);
+        });
+    });
+}

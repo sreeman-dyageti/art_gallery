@@ -1151,3 +1151,23 @@ body.dark .footer-link:hover {
     body { background: white; color: black; }
     .pin-card { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; }
 }
+/* MAIN IMAGE (TOP HERO) */
+#imagePreview {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+#imagePreview img {
+  width: 300px;
+  max-width: 100%;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+/* PROCESS IMAGES (GRID BELOW) */
+#processPreview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 10px;
+}
