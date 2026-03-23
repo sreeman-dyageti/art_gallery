@@ -1,32 +1,57 @@
 /* =============================================
-   Dark mode · Delete confirm · Char counter
-   Image preview · Drag & drop
+   Dark mode · Hamburger · Delete confirm
+   Char counter · Drag & drop · Process images
    ============================================= */
 
 // --- DARK MODE ---
-const toggleBtn = document.getElementById("themeToggle");
-
-if (toggleBtn) {
-    const savedTheme = localStorage.getItem("artfolio-theme");
-
-    if (savedTheme === "dark") {
-        document.body.classList.add("dark");
-        toggleBtn.querySelector(".toggle-icon").textContent = "☀️";
-    }
-
-    toggleBtn.addEventListener("click", () => {
-        document.body.classList.toggle("dark");
-        const isDark = document.body.classList.contains("dark");
-        localStorage.setItem("artfolio-theme", isDark ? "dark" : "light");
-        toggleBtn.querySelector(".toggle-icon").textContent = isDark ? "☀️" : "🌙";
+function applyTheme(isDark) {
+    document.body.classList.toggle("dark", isDark);
+    localStorage.setItem("artfolio-theme", isDark ? "dark" : "light");
+    document.querySelectorAll(".toggle-icon").forEach(icon => {
+        icon.textContent = isDark ? "☀️" : "🌙";
     });
 }
+
+const savedTheme = localStorage.getItem("artfolio-theme");
+if (savedTheme === "dark") applyTheme(true);
+
+document.querySelectorAll("#themeToggle, #themeToggleMobile").forEach(btn => {
+    if (!btn) return;
+    btn.addEventListener("click", () => {
+        applyTheme(!document.body.classList.contains("dark"));
+    });
+});
+
+// --- HAMBURGER MENU ---
+const hamburger  = document.getElementById("hamburger");
+const mobileMenu = document.getElementById("mobileMenu");
+const backdrop   = document.getElementById("menuBackdrop");
+
+function openMenu() {
+    hamburger?.classList.add("open");
+    mobileMenu?.classList.add("open");
+    backdrop?.classList.add("open");
+    document.body.classList.add("menu-open");
+}
+function closeMenu() {
+    hamburger?.classList.remove("open");
+    mobileMenu?.classList.remove("open");
+    backdrop?.classList.remove("open");
+    document.body.classList.remove("menu-open");
+}
+
+hamburger?.addEventListener("click", () =>
+    hamburger.classList.contains("open") ? closeMenu() : openMenu()
+);
+backdrop?.addEventListener("click", closeMenu);
+document.querySelectorAll(".mobile-nav-link").forEach(l => l.addEventListener("click", closeMenu));
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeMenu(); });
+window.addEventListener("resize", () => { if (window.innerWidth > 640) closeMenu(); });
 
 // --- DELETE CONFIRMATION ---
 document.querySelectorAll("form[action^='/delete']").forEach(form => {
     form.addEventListener("submit", e => {
-        const confirmed = confirm("Remove this artwork from your portfolio?");
-        if (!confirmed) e.preventDefault();
+        if (!confirm("Remove this artwork from your portfolio?")) e.preventDefault();
     });
 });
 
@@ -36,110 +61,129 @@ const counter  = document.getElementById("charCount");
 const MAX = 500;
 
 if (textarea && counter) {
-    // Init count on edit page (pre-filled content)
     counter.textContent = textarea.value.length;
-
     textarea.addEventListener("input", () => {
-        if (textarea.value.length > MAX) {
-            textarea.value = textarea.value.slice(0, MAX);
-        }
+        if (textarea.value.length > MAX) textarea.value = textarea.value.slice(0, MAX);
         counter.textContent = textarea.value.length;
-
-        // Warn when close to limit
         const pct = textarea.value.length / MAX;
         counter.style.color = pct > 0.9 ? "#dc2626" : pct > 0.75 ? "#d97706" : "";
     });
 }
 
-// --- IMAGE PREVIEW + DRAG & DROP ---
-const fileInput = document.getElementById("image-upload");
-const dropZone  = document.getElementById("dropZone");
-const preview   = document.getElementById("imagePreview");
+// --- MAIN IMAGE drag & drop ---
+const mainZone    = document.getElementById("mainDropZone");
+const mainInput   = document.getElementById("mainImageInput");
+const mainBody    = document.getElementById("mainDropBody");
+const mainPreview = document.getElementById("mainPreview");
 
-function showPreview(file) {
+function showMainPreview(file) {
     if (!file || !file.type.startsWith("image/")) return;
     const reader = new FileReader();
     reader.onload = e => {
-        if (preview) {
-           preview.innerHTML = `<img src="${e.target.result}" alt="Main Image">`;
-        }
-        if (dropZone) {
-            const text = dropZone.querySelector(".drop-text");
-            if (text) text.textContent = file.name;
-        }
+        if (mainPreview) mainPreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+        if (mainBody)    mainBody.style.display = "none";
     };
     reader.readAsDataURL(file);
 }
 
-if (fileInput) {
-    fileInput.addEventListener("change", () => {
-        if (fileInput.files[0]) showPreview(fileInput.files[0]);
+if (mainInput) {
+    mainInput.addEventListener("change", () => {
+        if (mainInput.files[0]) showMainPreview(mainInput.files[0]);
     });
 }
 
-if (dropZone) {
-    ["dragenter", "dragover"].forEach(evt => {
-        dropZone.addEventListener(evt, e => {
-            e.preventDefault();
-            dropZone.classList.add("drag-over");
-        });
-    });
-
-    ["dragleave", "drop"].forEach(evt => {
-        dropZone.addEventListener(evt, e => {
-            dropZone.classList.remove("drag-over");
-        });
-    });
-
-    dropZone.addEventListener("drop", e => {
+if (mainZone) {
+    ["dragenter", "dragover"].forEach(evt =>
+        mainZone.addEventListener(evt, e => { e.preventDefault(); mainZone.classList.add("drag-over"); })
+    );
+    ["dragleave", "drop"].forEach(evt =>
+        mainZone.addEventListener(evt, () => mainZone.classList.remove("drag-over"))
+    );
+    mainZone.addEventListener("drop", e => {
         e.preventDefault();
         const file = e.dataTransfer.files[0];
-        if (file && fileInput) {
-            // Create a DataTransfer to assign to the file input
+        if (file && file.type.startsWith("image/")) {
             const dt = new DataTransfer();
             dt.items.add(file);
-            fileInput.files = dt.files;
-            showPreview(file);
+            mainInput.files = dt.files;
+            showMainPreview(file);
         }
     });
 }
-// --- SMOOTH SCROLL TOP ON LOGO CLICK ---
+
+// --- PROCESS IMAGES drag & drop + grid preview ---
+const processZone  = document.getElementById("processDropZone");
+const processInput = document.getElementById("processImagesInput");
+const processBody  = document.getElementById("processDropBody");
+const previewGrid  = document.getElementById("processPreviewGrid");
+
+let processFiles = new DataTransfer();
+
+function renderProcessPreviews() {
+    if (!previewGrid) return;
+    previewGrid.innerHTML = "";
+
+    Array.from(processFiles.files).forEach((file, i) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const item = document.createElement("div");
+            item.className = "preview-item";
+            item.innerHTML = `
+                <img src="${e.target.result}" alt="Step ${i + 1}">
+                <span class="preview-step">Step ${i + 1}</span>
+                <button type="button" class="remove-btn" data-index="${i}">✕</button>
+            `;
+            previewGrid.appendChild(item);
+
+            item.querySelector(".remove-btn").addEventListener("click", () => {
+                const newDt = new DataTransfer();
+                Array.from(processFiles.files).forEach((f, j) => {
+                    if (j !== i) newDt.items.add(f);
+                });
+                processFiles = newDt;
+                if (processInput) processInput.files = processFiles.files;
+                renderProcessPreviews();
+            });
+        };
+        reader.readAsDataURL(file);
+    });
+
+    if (processBody) {
+        const count = processFiles.files.length;
+        processBody.querySelector(".drop-text").textContent = count > 0
+            ? `${count} image${count > 1 ? "s" : ""} selected — click to add more`
+            : "Click or drag & drop process photos";
+    }
+}
+
+if (processInput) {
+    processInput.addEventListener("change", () => {
+        Array.from(processInput.files).forEach(f => processFiles.items.add(f));
+        processInput.files = processFiles.files;
+        renderProcessPreviews();
+    });
+}
+
+if (processZone) {
+    ["dragenter", "dragover"].forEach(evt =>
+        processZone.addEventListener(evt, e => { e.preventDefault(); processZone.classList.add("drag-over"); })
+    );
+    ["dragleave", "drop"].forEach(evt =>
+        processZone.addEventListener(evt, () => processZone.classList.remove("drag-over"))
+    );
+    processZone.addEventListener("drop", e => {
+        e.preventDefault();
+        Array.from(e.dataTransfer.files).forEach(f => {
+            if (f.type.startsWith("image/")) processFiles.items.add(f);
+        });
+        processInput.files = processFiles.files;
+        renderProcessPreviews();
+    });
+}
+
+// --- SMOOTH SCROLL ON LOGO CLICK ---
 document.querySelectorAll(".logo-link").forEach(link => {
     link.addEventListener("click", () => {
-        if (window.location.pathname === "/") {
-            window.scrollTo({ top: 0, behavior: "smooth" });
-        }
+        if (window.location.pathname === "/") window.scrollTo({ top: 0, behavior: "smooth" });
     });
 });
-// --- PROCESS IMAGES PREVIEW (MULTIPLE) ---
-const processInput = document.getElementById("process-upload");
-const processPreview = document.getElementById("processPreview");
-
-if (processInput && processPreview) {
-    processInput.addEventListener("change", () => {
-        processPreview.innerHTML = ""; // clear old previews
-
-        const files = processInput.files;
-
-        Array.from(files).forEach(file => {
-            if (!file.type.startsWith("image/")) return;
-
-            const reader = new FileReader();
-
-            reader.onload = e => {
-                const img = document.createElement("img");
-                img.src = e.target.result;
-
-                img.style.width = "100%";
-                img.style.height = "90px";
-                img.style.objectFit = "cover";
-                img.style.borderRadius = "8px";
-                img.style.margin = "5px";
-
-                processPreview.appendChild(img);
-            };
-
-            reader.readAsDataURL(file);
-        });
-    });
-}

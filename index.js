@@ -72,7 +72,7 @@ app.get("/home",(req,res)=>{
 });
 
 // Show single post
-app.get("/posts/:index", async (req, res) => {
+app.get("/posts/:id", async (req, res) => {
   try {
     const { rows } = await db.query("SELECT * FROM posts WHERE id = $1", [req.params.id]);
     if (!rows[0]) return res.redirect("/");
