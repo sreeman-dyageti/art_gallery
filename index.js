@@ -59,7 +59,7 @@ app.get("/",async (req, res) => {
   const result = await db.query("SELECT * FROM posts ORDER BY created_at DESC");
   const posts = result.rows;
   res.render("index",{posts});
-  } catch (error) {
+  } catch (err) {
     console.error(err);
     res.status(500).send("Database error");
   }
@@ -162,34 +162,84 @@ app.get("/edit/:id", async (req, res) => {
   }
 });
   
+// Update post
+app.post("/update/:id", upload.fields([
+  { name: "image", maxCount: 1 },
+  { name: "processImages", maxCount: 10 }
+]), async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    const id = req.params.id;
 
-//update post
-app.post("/update/:index",upload.single("image"),(req,res)=>{
-  const index= parseInt(req.params.index);
+    // Get existing post
+    const { rows } = await db.query("SELECT * FROM posts WHERE id = $1", [id]);
+    if (!rows[0]) return res.redirect("/");
+    const existing = rows[0];
 
-  if(!posts[index]){
-    return res.redirect("/");
-  };
-  posts[index]={
-    title:req.body.title,
-    content:req.body.content,
-    image: req.file 
-      ? `/uploads/${req.file.filename}`   
-      : (req.body.existingImage || null ),
-    createdAt: posts[index].createdAt,
-    uploadAt:new Date(),
-  };
-  res.redirect("/");
+    // Main image
+    let imageUrl = existing.image;
+    let imageId  = existing.image_id;
+
+    if (req.files["image"]) {
+      // Delete old from Cloudinary
+      if (imageId) await cloudinary.uploader.destroy(imageId).catch(() => {});
+
+      const file = req.files["image"][0];
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "artfolio/main" },
+          (error, result) => error ? reject(error) : resolve(result)
+        );
+        stream.end(file.buffer);
+      });
+      imageUrl = result.secure_url;
+      imageId  = result.public_id;
+    }
+
+    // Process images
+    let processImageUrls = existing.process_images || [];
+
+    if (req.files["processImages"]) {
+      for (let file of req.files["processImages"]) {
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "artfolio/process" },
+            (error, result) => error ? reject(error) : resolve(result)
+          );
+          stream.end(file.buffer);
+        });
+        processImageUrls.push(result.secure_url);
+      }
+    }
+
+    await db.query(
+      "UPDATE posts SET title=$1, content=$2, image=$3, image_id=$4, process_images=$5, updated_at=NOW() WHERE id=$6",
+      [title, content, imageUrl, imageId, JSON.stringify(processImageUrls), id]
+    );
+
+    res.redirect("/");
+  } catch (err) {
+    console.error(err);
+    res.redirect("/");
+  }
 });
 
-//Delete post
-app.post("/delete/:index",(req,res)=>{
-  const index= parseInt(req.params.index);
+// Delete post
+app.post("/delete/:id", async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      "DELETE FROM posts WHERE id = $1 RETURNING image_id, process_images",
+      [req.params.id]
+    );
+    // Delete main image from Cloudinary
+    const imageId = rows[0]?.image_id;
+    if (imageId) await cloudinary.uploader.destroy(imageId).catch(() => {});
 
-  if(posts[index]){
-    posts.splice(index,1);
+    res.redirect("/");
+  } catch (err) {
+    console.error(err);
+    res.redirect("/");
   }
-  res.redirect("/");
 });
 
 // 404
