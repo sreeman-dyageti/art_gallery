@@ -27,7 +27,23 @@
         </div>
     </a>
 
-    <nav class="topbar-nav">
+    <!-- Search bar -->
+    <form class="search-form" action="/search" method="GET">
+        <div class="search-wrap">
+            <i class="fi fi-rr-search search-icon"></i>
+            <input
+                type="text"
+                name="q"
+                class="search-input"
+                placeholder="Search artworks..."
+                value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>"
+                autocomplete="off"
+            >
+        </div>
+    </form>
+
+   <!-- Desktop nav -->
+    <nav class="topbar-nav" id="desktopNav">
         <a href="/" class="nav-link">
             <i class="fi fi-rr-home"></i>
             <span>Explore</span>
@@ -40,6 +56,39 @@
             <span class="toggle-icon">🌙</span>
         </button>
     </nav>
+
+    <!-- Mobile controls -->
+    <div class="mobile-controls">
+        <button id="themeToggleMobile" class="theme-toggle" aria-label="Toggle dark mode">
+            <span class="toggle-icon">🌙</span>
+        </button>
+        <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
+    </div>
 </header>
+
+<!-- Mobile search -->
+<div class="mobile-search-bar">
+    <form class="search-form" action="/search" method="GET">
+        <div class="search-wrap">
+            <i class="fi fi-rr-search search-icon"></i>
+            <input type="text" name="q" class="search-input"
+                   placeholder="Search artworks..."
+                   autocomplete="off">
+        </div>
+    </form>
+</div>
+
+<!-- Mobile menu -->
+<div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+    <nav class="mobile-nav">
+        <a href="/" class="mobile-nav-link"><i class="fi fi-rr-home"></i> Explore Gallery</a>
+        <a href="/new" class="mobile-nav-link mobile-nav-cta"><i class="fi fi-rr-plus"></i> New Post</a>
+    </nav>
+</div>
+<div class="menu-backdrop" id="menuBackdrop"></div>
 
 <main class="main-content">
