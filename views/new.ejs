@@ -1,58 +1,58 @@
 <%- include("partials/header") %>
+
 <div class="form-page">
     <div class="form-header">
-        <div class="form-icon">✦</div>
         <h1 class="form-title">Share Your <em>Art</em></h1>
         <p class="form-subtitle">Document your creative process and inspire other artists.</p>
     </div>
 
     <form class="post-form" action="/create" method="post" enctype="multipart/form-data">
+
         <div class="field-group">
             <label class="field-label" for="title">Title</label>
-            <input 
-                type="text" 
-                id="title"
-                name="title" 
-                placeholder="Name your artwork..." 
-                required
-                autocomplete="off"
-            >
+            <input type="text" id="title" name="title"
+                   placeholder="Name your artwork..." required autocomplete="off">
         </div>
 
         <div class="field-group">
             <label class="field-label" for="content-area">Artist's Note</label>
-            <textarea 
-                id="content-area" 
-                name="content" 
-                maxlength="500" 
-                rows="5" 
-                placeholder="Describe your creative process, the story behind this piece, techniques used..."
-                required
-            ></textarea>
-            <div class="char-counter">
-                <span id="charCount">0</span> / 500
+            <textarea id="content-area" name="content" maxlength="500" rows="5"
+                      placeholder="Describe your creative process, the story behind this piece..."
+                      required></textarea>
+            <div class="char-counter"><span id="charCount">0</span> / 500</div>
+        </div>
+
+        <!-- MAIN IMAGE -->
+        <div class="field-group">
+            <label class="field-label">Main Artwork Image</label>
+            <div class="drop-zone" id="mainDropZone">
+                <input type="file" id="mainImageInput" name="image"
+                       accept="image/*" class="drop-input">
+                <div class="drop-body" id="mainDropBody">
+                  
+                    <p class="drop-text">Click or drag & drop your main image</p>
+                    <p class="drop-hint">JPG, PNG, GIF, WEBP</p>
+                </div>
+                <div class="drop-preview-single" id="mainPreview"></div>
             </div>
         </div>
 
+        <!-- PROCESS IMAGES -->
         <div class="field-group">
-            <label class="field-label">Process Images</label>
-
-            <label class="file-drop" for="process-upload" id="processDropZone">
-                <p class="drop-text">Upload your drawing steps</p>
-                <p class="drop-hint">You can select multiple images to show your process</p>
-                <div class="drop-preview" id="processPreview"></div>
+            <label class="field-label">Creative Process Images
+                <span class="field-sublabel">— show how this piece came to life (up to 10)</span>
             </label>
-
-            <input
-                type="file"
-                id="process-upload"
-                name="processImages"
-                accept="image/*"
-                class="file-input-hidden"
-                multiple
-            >
-             <div class="main-preview" id="imagePreview"></div>
-             <div class="process-preview" id="processPreview"></div>
+            <div class="drop-zone" id="processDropZone">
+                <input type="file" id="processImagesInput" name="processImages"
+                       accept="image/*" class="drop-input" multiple>
+                <div class="drop-body" id="processDropBody">
+                    
+                    <p class="drop-text">Click or drag & drop process photos</p>
+                    <p class="drop-hint">Upload multiple images — sketches, drafts, steps</p>
+                </div>
+            </div>
+            <!-- Side-by-side previews grid -->
+            <div class="process-preview-grid" id="processPreviewGrid"></div>
         </div>
 
         <button type="submit" class="submit-btn">

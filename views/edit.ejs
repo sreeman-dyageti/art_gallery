@@ -7,7 +7,7 @@
         <p class="form-subtitle">Refine your post and update your creative story.</p>
     </div>
 
-    <form class="post-form" action="/update/<%= index %>" method="POST" enctype="multipart/form-data">
+    <form class="post-form" action="/update/<%= post.id %>" method="POST" enctype="multipart/form-data">
 
         <div class="field-group">
             <label class="field-label" for="title">Title</label>
@@ -40,12 +40,10 @@
         <div class="field-group">
             <label class="field-label">Artwork Image</label>
 
-            <% if (post.image) { %>
-            <div class="current-image-wrap">
-                <img src="<%= post.image %>" alt="Current image" class="current-preview">
-                <span class="current-label">Current image</span>
-            </div>
-            <input type="hidden" name="existingImage" value="<%= post.image %>">
+           <% if (post.image_url) { %>
+           <img src="<%= post.image_url %>" alt="Current image" class="current-preview">
+           <input type="hidden" name="existingImage" value="<%= post.image_url %>">
+           <p class="drop-text"><%= post.image_url ? 'Click to replace image' : 'Click to upload image' %></p>
             <% } %>
 
             <label class="file-drop" for="image-upload" id="dropZone">
