@@ -1,14 +1,27 @@
 <%- include("partials/header.ejs") %>
 
+<% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
+<div class="search-results-header">
+    <p class="search-info">
+        <% if (posts.length === 0) { %>
+            No results for "<strong><%= searchQuery %></strong>" — <a href="/">see all posts</a>
+        <% } else { %>
+            <%= posts.length %> result<%= posts.length !== 1 ? 's' : '' %> for "<strong><%= searchQuery %></strong>"
+        <% } %>
+    </p>
+</div>
+<% } %>
+
 <% if (posts.length === 0) { %>
 <div class="empty-state">
- <h2 class="empty-title">The gallery is waiting for you</h2>
-   <p class="empty-sub">Share your first artwork and start building your creative portfolio.</p>
-   <a href="/new" class="btn-primary">
-   <i class="fi fi-rr-plus"></i>
-    Create Your First Post
-        </a>
-    </div>
+    <div class="empty-icon">🎨</div>
+    <h2 class="empty-title">The gallery is waiting for you</h2>
+    <p class="empty-sub">Share your first artwork and start building your creative portfolio.</p>
+    <a href="/new" class="btn-primary">
+        <i class="fi fi-rr-plus"></i>
+        Create Your First Post
+    </a>
+</div>
 <% } else { %>
 
 <div class="gallery-header">
@@ -16,26 +29,43 @@
     <p class="gallery-count"><%= posts.length %> <%= posts.length === 1 ? 'piece' : 'pieces' %> shared</p>
 </div>
 
-<div class="masonry-grid">
-    <% posts.forEach((post, index) => { %>
-    <div class="pin-card" data-index="<%= index %>">
-        <a href="/posts/<%= index %>" class="pin-image-wrap">
-      <% const hasValidImage = post.image && post.image !== 'undefined' && post.image !== 'null'; %>
-      <% if (hasValidImage) { %>
-    <img src="<%= post.image %>" alt="<%= post.title %>" class="pin-img" loading="lazy">
-     <% } else { %>
-                <div class="pin-placeholder">
-     <span class="placeholder-icon">🖼️</span>
-                </div>
+<div class="pinterest-grid" id="pinterestGrid">
+    <% posts.forEach((post, i) => { %>
+     <div class="p-item"></div>
+
+        <a href="/posts/<%= post.id %>" class="p-img-link">
+            <% const hasValidImage = post.image && post.image !== 'undefined' && post.image !== 'null'; %>
+            <% if (hasValidImage) { %>
+                <img src="<%= post.image %>"
+                     alt="<%= post.title %>"
+                     class="p-img"
+                     loading="lazy">
+            <% } else { %>
+                <div class="p-no-img">🖼️</div>
             <% } %>
-            <div class="pin-overlay">
-                <span class="pin-view-btn">View</span>
+
+            <div class="p-hover">
+                <% 
+                  let stepCount = 0;
+                  try {
+                    const imgs = Array.isArray(post.process_images)
+                      ? post.process_images
+                      : JSON.parse(post.process_images || '[]');
+                    stepCount = imgs.length;
+                  } catch(e) { stepCount = 0; }
+                %>
+                <% if (stepCount > 0) { %>
+                <span class="p-steps-badge">
+                    <i class="fi fi-rr-layers"></i>
+                    <%= stepCount %> steps
+                </span>
+                <% } %>
             </div>
         </a>
 
-        <div class="pin-body">
-            <h3 class="pin-title"><%= post.title %></h3>
-            <p class="pin-excerpt"><%= post.content %></p>
+        <div class="p-info">
+            <h3 class="p-title"><%= post.title %></h3>
+            <p class="p-excerpt"><%= post.content %></p>
         </div>
 
         <div class="pin-actions">
@@ -48,6 +78,7 @@
                 </button>
             </form>
         </div>
+
     </div>
     <% }); %>
 </div>
