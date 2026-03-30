@@ -1,52 +1,160 @@
 <%- include("partials/header.ejs") %>
 
-<div class="show-container">
+<div class="detail-page">
+
+    <!-- Back button -->
     <a href="/" class="back-link">
-        <i class="fi fi-rr-arrow-left"></i> Back to Gallery
+        <i class="fi fi-rr-arrow-left"></i> Back
     </a>
 
-    <article class="show-card">
-        <div class="show-image-wrap">
-            <% const hasValidImage = post.image && post.image !== 'undefined' && post.image !== 'null'; %>
-            <% if (hasValidImage) { %>
-                <img src="<%= post.image %>" alt="<%= post.title %>" class="show-img">
-            <% } else { %>
-                <img src="/img/default.jpg" alt="Default img" class="show-img">
+    <!-- Main detail panel -->
+    <div class="detail-panel">
+
+        <!-- Left: main image -->
+        <div class="detail-left">
+            <div class="detail-main-img-wrap">
+                <% if (post.image_url) { %>
+                    <img src="<%= post.image %>" alt="<%= post.title %>" class="detail-main-img">
+                <% } else { %>
+                    <div class="detail-no-img">🖼️</div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Right: info + process steps -->
+        <div class="detail-right">
+            <div class="detail-meta-top">
+                <span class="detail-badge">Artwork</span>
+                <div class="detail-actions-top">
+                    <a href="/edit/<%= post.id %>" class="btn-icon" title="Edit">
+                        <i class="fi fi-rr-pencil"></i>
+                    </a>
+                    <form action="/delete/<%= post.id %>" method="post" style="display:inline">
+                        <button type="submit" class="btn-icon btn-icon-danger" title="Delete">
+                            <i class="fi fi-rr-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <h1 class="detail-title"><%= post.title %></h1>
+            <div class="detail-divider"></div>
+
+            <p class="detail-label">Artist's Note</p>
+            <p class="detail-content"><%= post.content %></p>
+
+            <p class="detail-date">
+                <i class="fi fi-rr-calendar"></i>
+                <%= new Date(post.created_at).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) %>
+            </p>
+
+            <!-- Process images section -->
+            <%
+              let processImgs = [];
+              try {
+                processImgs = Array.isArray(post.process_images)
+                  ? post.process_images
+                  : JSON.parse(post.process_images || '[]');
+              } catch(e) { processImgs = []; }
+            %>
+
+            <% if (processImgs.length > 0) { %>
+            <div class="process-section">
+                <p class="detail-label">
+                    <i class="fi fi-rr-layers"></i>
+                    Creative Process — <%= processImgs.length %> steps
+                </p>
+
+                <!-- Slideshow -->
+                <div class="process-slideshow">
+                    <div class="slideshow-track" id="slideshowTrack">
+                        <% processImgs.forEach((img, idx) => { %>
+                        <div class="slide <% if(idx===0){ %>active<% } %>">
+                            <img src="<%= img %>" alt="Step <%= idx+1 %>">
+                            <span class="slide-step">Step <%= idx + 1 %> / <%= processImgs.length %></span>
+                        </div>
+                        <% }); %>
+                    </div>
+
+                    <% if (processImgs.length > 1) { %>
+                    <div class="slideshow-controls">
+                        <button class="slide-btn" id="slidePrev">
+                            <i class="fi fi-rr-angle-left"></i>
+                        </button>
+                        <div class="slide-dots" id="slideDots">
+                            <% processImgs.forEach((_, idx) => { %>
+                            <span class="dot <% if(idx===0){ %>active<% } %>" data-idx="<%= idx %>"></span>
+                            <% }); %>
+                        </div>
+                        <button class="slide-btn" id="slideNext">
+                            <i class="fi fi-rr-angle-right"></i>
+                        </button>
+                    </div>
+                    <% } %>
+                </div>
+
+                <!-- Thumbnail strip -->
+                <div class="process-thumbs">
+                    <% processImgs.forEach((img, idx) => { %>
+                    <div class="thumb <% if(idx===0){ %>active<% } %>" data-idx="<%= idx %>">
+                        <img src="<%= img %>" alt="Step <%= idx+1 %>">
+                    </div>
+                    <% }); %>
+                </div>
+            </div>
             <% } %>
         </div>
+    </div>
 
-        <div class="show-details">
-            <div class="show-badge">Artwork</div>
-            <h1 class="show-title"><%= post.title %></h1>
-
-            <div class="show-divider"></div>
-
-            <div class="show-content-wrap">
-                <p class="show-label">Artist's Note</p>
-                <p class="show-content"><%= post.content %></p>
-            </div>
-
-            <div class="show-meta">
-                <span class="meta-tag">
-                    <i class="fi fi-rr-palette"></i> Creative Work
-                </span>
-                <span class="meta-tag">
-                    <i class="fi fi-rr-eye"></i> Portfolio
-                </span>
-            </div>
-
-            <div class="show-actions">
-                <a href="/edit/<%= index %>" class="btn-primary">
-                    <i class="fi fi-rr-pencil"></i> Edit Post
+    <!-- Related posts -->
+    <% if (related && related.length > 0) { %>
+    <div class="related-section">
+        <h2 class="related-title">More Artwork</h2>
+        <div class="pinterest-grid">
+            <% related.forEach((r, i) => { %>
+            <div class="p-item" >
+                <a href="/posts/<%= r.id %>" class="p-img-link">
+                    <% if (r.image_url) { %>
+                        <img src="<%= r.image%>" alt="<%= r.title %>" class="p-img" loading="lazy">
+                    <% } else { %>
+                        <div class="p-no-img">🖼️</div>
+                    <% } %>
                 </a>
-                <form action="/delete/<%= index %>" method="post">
-                    <button type="submit" class="btn-danger">
-                        <i class="fi fi-rr-trash"></i> Delete
-                    </button>
-                </form>
+                <div class="p-info">
+                    <h3 class="p-title"><%= r.title %></h3>
+                </div>
             </div>
+            <% }); %>
         </div>
-    </article>
+    </div>
+    <% } %>
+
 </div>
+
+<script>
+// Slideshow
+const track  = document.getElementById("slideshowTrack");
+const dots   = document.querySelectorAll(".dot");
+const thumbs = document.querySelectorAll(".thumb");
+let current  = 0;
+
+function goTo(idx) {
+    document.querySelectorAll(".slide").forEach((s, i) => s.classList.toggle("active", i === idx));
+    dots.forEach((d, i)   => d.classList.toggle("active", i === idx));
+    thumbs.forEach((t, i) => t.classList.toggle("active", i === idx));
+    current = idx;
+}
+
+document.getElementById("slideNext")?.addEventListener("click", () => {
+    const slides = document.querySelectorAll(".slide");
+    goTo((current + 1) % slides.length);
+});
+document.getElementById("slidePrev")?.addEventListener("click", () => {
+    const slides = document.querySelectorAll(".slide");
+    goTo((current - 1 + slides.length) % slides.length);
+});
+dots.forEach(d   => d.addEventListener("click",   () => goTo(+d.dataset.idx)));
+thumbs.forEach(t => t.addEventListener("click",   () => goTo(+t.dataset.idx)));
+</script>
 
 <%- include("partials/footer.ejs") %>
