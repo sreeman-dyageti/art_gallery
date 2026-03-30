@@ -74,9 +74,19 @@ app.get("/home",(req,res)=>{
 // Show single post
 app.get("/posts/:id", async (req, res) => {
   try {
-    const { rows } = await db.query("SELECT * FROM posts WHERE id = $1", [req.params.id]);
+    const { rows } = await db.query(
+      "SELECT * FROM posts WHERE id = $1",
+      [req.params.id]
+    );
     if (!rows[0]) return res.redirect("/");
-    res.render("show", { post: rows[0] });
+
+    // Related posts — latest 6 excluding current
+    const { rows: related } = await db.query(
+      "SELECT * FROM posts WHERE id != $1 ORDER BY created_at DESC LIMIT 6",
+      [req.params.id]
+    );
+
+    res.render("show", { post: rows[0], related });
   } catch (err) {
     console.error(err);
     res.redirect("/");
@@ -86,6 +96,37 @@ app.get("/posts/:id", async (req, res) => {
 // show create post page 
 app.get("/new",(req,res)=>{
   res.render("new");
+});
+
+//Edit and Update posts
+app.get("/edit/:id", async (req, res) => {
+  try {
+    const { rows } = await db.query("SELECT * FROM posts WHERE id = $1", [req.params.id]);
+    if (!rows[0]) return res.redirect("/");
+    res.render("edit", { post: rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.redirect("/");
+  }
+});
+
+// Search
+app.get("/search", async (req, res) => {
+  try {
+    const q = req.query.q?.trim() || "";
+    if (!q) return res.redirect("/");
+
+    const { rows: posts } = await db.query(
+      `SELECT * FROM posts
+       WHERE title ILIKE $1 OR content ILIKE $1
+       ORDER BY created_at DESC`,
+      [`%${q}%`]
+    );
+    res.render("index", { posts, searchQuery: q });
+  } catch (err) {
+    console.error(err);
+    res.redirect("/");
+  }
 });
 
 //create post 
@@ -146,19 +187,6 @@ app.post("/create", upload.fields([
     res.redirect("/");
   } catch (error) {
     console.log(error);
-  }
-});
-
-
-//Edit and Update posts
-app.get("/edit/:id", async (req, res) => {
-  try {
-    const { rows } = await db.query("SELECT * FROM posts WHERE id = $1", [req.params.id]);
-    if (!rows[0]) return res.redirect("/");
-    res.render("edit", { post: rows[0] });
-  } catch (err) {
-    console.error(err);
-    res.redirect("/");
   }
 });
   

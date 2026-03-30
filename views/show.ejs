@@ -14,7 +14,7 @@
         <div class="detail-left">
             <div class="detail-main-img-wrap">
                 <% if (post.image_url) { %>
-                    <img src="<%= post.image %>" alt="<%= post.title %>" class="detail-main-img">
+                    <img src="<%= post.image_url %>" alt="<%= post.title %>" class="detail-main-img">
                 <% } else { %>
                     <div class="detail-no-img">🖼️</div>
                 <% } %>
@@ -112,10 +112,10 @@
         <h2 class="related-title">More Artwork</h2>
         <div class="pinterest-grid">
             <% related.forEach((r, i) => { %>
-            <div class="p-item" >
+            <div class="p-item">
                 <a href="/posts/<%= r.id %>" class="p-img-link">
                     <% if (r.image_url) { %>
-                        <img src="<%= r.image%>" alt="<%= r.title %>" class="p-img" loading="lazy">
+                        <img src="<%= r.image_url %>" alt="<%= r.title %>" class="p-img" loading="lazy">
                     <% } else { %>
                         <div class="p-no-img">🖼️</div>
                     <% } %>
