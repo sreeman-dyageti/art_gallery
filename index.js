@@ -1,114 +1,140 @@
-import express      from "express";
-import bodyParser   from "body-parser";
-import cloudinary from "./cloudinary.js";
-import path         from "path";
+import express           from "express";
+import bodyParser        from "body-parser";
+import cloudinary        from "./cloudinary.js";
+import path              from "path";
 import { fileURLToPath } from "url";
-import dotenv       from "dotenv";
-import session      from "express-session";
-import pg           from "pg";
-import multer from "multer";
-
-
+import dotenv            from "dotenv";
+import session           from "express-session";
+import pg                from "pg";
+import multer            from "multer";
+import bcrypt            from "bcrypt";
+import passport          from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 
-const app   = express();
-const port  = process.env.PORT || 3000;
+const app  = express();
+const port = process.env.PORT || 3000;
+const SALT_ROUNDS = 12;
 
+// ── Multer memory storage 
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload  = multer({ storage });
 
-// pg connection
+// ── PostgreSQL 
 const db = new pg.Client({
-  user: process.env.PG_USER,
-  host: process.env.PG_HOST,
+  user:     process.env.PG_USER,
+  host:     process.env.PG_HOST,
   database: process.env.PG_DATABASE,
   password: process.env.PG_PASSWORD,
-  port: process.env.PG_PORT,
+  port:     process.env.PG_PORT,
 });
 
-db.connect();
-// middleware
+db.connect()
+  .then(() => console.log("✅ PostgreSQL connected"))
+  .catch(err => { console.error("❌ DB error:", err.message); process.exit(1); });
+
+// ── Middleware ────────────────────────────────
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.set("view engine", "ejs");
-app.set("views",path.join(__dirname,"views"));
-app.use (session({
- secret:process.env.SESSION_SECRET,
+app.set("views", path.join(__dirname, "views"));
+
+app.use(session({
+  secret:            process.env.SESSION_SECRET,
   resave:            false,
-  saveUninitialized: false,          
+  saveUninitialized: false,
   cookie: {
-    maxAge:   1000 * 60 * 60 * 24,  
-    httpOnly: true,                 
-    secure:   false,  
+    maxAge:   1000 * 60 * 60 * 24,
+    httpOnly: true,
+    secure:   false,
   }
-}
-));
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// currentUser available in ALL views
 app.use((req, res, next) => {
-  res.locals.currentUser = req.session.user || null;
+  res.locals.currentUser = req.user || null;
   next();
 });
 
-// routes
-//home page, All posts
-app.get("/",async (req, res) => {
+// ── Passport local strategy 
+passport.use(new LocalStrategy(
+  { usernameField: "email" },
+  async (email, password, done) => {
+    try {
+      const { rows } = await db.query(
+        "SELECT * FROM users WHERE email = $1", [email]
+      );
+      if (!rows[0]) return done(null, false, { message: "No account with that email." });
+
+      const match = await bcrypt.compare(password, rows[0].password_hash);
+      if (!match) return done(null, false, { message: "Incorrect password." });
+
+      return done(null, rows[0]);
+    } catch (err) {
+      return done(err);
+    }
+  }
+));
+
+passport.serializeUser((user, done) => done(null, user.id));
+
+passport.deserializeUser(async (id, done) => {
   try {
-  const result = await db.query("SELECT * FROM posts ORDER BY created_at DESC");
-  const posts = result.rows;
-  res.render("index",{posts});
+    const { rows } = await db.query("SELECT * FROM users WHERE id = $1", [id]);
+    done(null, rows[0]);
+  } catch (err) {
+    done(err);
+  }
+});
+
+// ── Auth middleware 
+function requireLogin(req, res, next) {
+  if (req.isAuthenticated()) return next();
+  res.redirect("/login");
+}
+
+function isOwner(post, user) {
+  return user && post.user_id === user.id;
+}
+
+// ── Upload helper 
+async function uploadToCloudinary(buffer, folder) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder },
+      (err, result) => err ? reject(err) : resolve(result)
+    );
+    stream.end(buffer);
+  });
+}
+
+
+// ROUTES
+
+// Home
+app.get("/", async (req, res) => {
+  try {
+    const { rows: posts } = await db.query(`
+      SELECT posts.*, users.username
+      FROM posts
+      LEFT JOIN users ON posts.user_id = users.id
+      ORDER BY posts.created_at DESC
+    `);
+    res.render("index", { posts });
   } catch (err) {
     console.error(err);
     res.status(500).send("Database error");
   }
- 
 });
 
-//redirect home
-app.get("/home",(req,res)=>{
-  res.redirect('/');
-});
-
-// Show single post
-app.get("/posts/:id", async (req, res) => {
-  try {
-    const { rows } = await db.query(
-      "SELECT * FROM posts WHERE id = $1",
-      [req.params.id]
-    );
-    if (!rows[0]) return res.redirect("/");
-
-    // Related posts — latest 6 excluding current
-    const { rows: related } = await db.query(
-      "SELECT * FROM posts WHERE id != $1 ORDER BY created_at DESC LIMIT 6",
-      [req.params.id]
-    );
-
-    res.render("show", { post: rows[0], related });
-  } catch (err) {
-    console.error(err);
-    res.redirect("/");
-  }
-});
-
-// show create post page 
-app.get("/new",(req,res)=>{
-  res.render("new");
-});
-
-//Edit and Update posts
-app.get("/edit/:id", async (req, res) => {
-  try {
-    const { rows } = await db.query("SELECT * FROM posts WHERE id = $1", [req.params.id]);
-    if (!rows[0]) return res.redirect("/");
-    res.render("edit", { post: rows[0] });
-  } catch (err) {
-    console.error(err);
-    res.redirect("/");
-  }
-});
+app.get("/home", (req, res) => res.redirect("/"));
 
 // Search
 app.get("/search", async (req, res) => {
@@ -116,12 +142,14 @@ app.get("/search", async (req, res) => {
     const q = req.query.q?.trim() || "";
     if (!q) return res.redirect("/");
 
-    const { rows: posts } = await db.query(
-      `SELECT * FROM posts
-       WHERE title ILIKE $1 OR content ILIKE $1
-       ORDER BY created_at DESC`,
-      [`%${q}%`]
-    );
+    const { rows: posts } = await db.query(`
+      SELECT posts.*, users.username
+      FROM posts
+      LEFT JOIN users ON posts.user_id = users.id
+      WHERE posts.title ILIKE $1 OR posts.content ILIKE $1
+      ORDER BY posts.created_at DESC
+    `, [`%${q}%`]);
+
     res.render("index", { posts, searchQuery: q });
   } catch (err) {
     console.error(err);
@@ -129,122 +157,153 @@ app.get("/search", async (req, res) => {
   }
 });
 
-//create post 
-app.post("/create", upload.fields([
-  { name: "image", maxCount: 1 },
+// Show single post
+app.get("/posts/:id", async (req, res) => {
+  try {
+    const { rows } = await db.query(`
+      SELECT posts.*, users.username
+      FROM posts
+      LEFT JOIN users ON posts.user_id = users.id
+      WHERE posts.id = $1
+    `, [req.params.id]);
+
+    if (!rows[0]) return res.redirect("/");
+
+    const { rows: related } = await db.query(`
+      SELECT posts.*, users.username
+      FROM posts
+      LEFT JOIN users ON posts.user_id = users.id
+      WHERE posts.id != $1
+      ORDER BY posts.created_at DESC
+      LIMIT 6
+    `, [req.params.id]);
+
+    const post = rows[0];
+    res.render("show", {
+      post,
+      related,
+      canEdit: isOwner(post, req.user)
+    });
+  } catch (err) {
+    console.error(err);
+    res.redirect("/");
+  }
+});
+
+// ── New post 
+app.get("/new", requireLogin, (req, res) => res.render("new"));
+
+app.post("/create", requireLogin, upload.fields([
+  { name: "image",         maxCount: 1  },
   { name: "processImages", maxCount: 10 }
 ]), async (req, res) => {
   try {
     const { title, content } = req.body;
-    const createdAt = new Date();
 
-    // MAIN IMAGE
-    let mainImageUrl = null;
-
+    // Main image
+    let image_url = null, image_id = null;
     if (req.files["image"]) {
-      const file = req.files["image"][0];
-
-      const result = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: "artfolio/main" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-        stream.end(file.buffer);
-      });
-
-      mainImageUrl = result.secure_url;
+      const result = await uploadToCloudinary(req.files["image"][0].buffer, "artfolio/main");
+      image_url = result.secure_url;
+      image_id  = result.public_id;
     }
 
-    // PROCESS IMAGES
-    let processImageUrls = [];
-
+    // Process images
+    let processUrls = [];
     if (req.files["processImages"]) {
-      for (let file of req.files["processImages"]) {
-        const result = await new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            { folder: "artfolio/process" },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          );
-          stream.end(file.buffer);
-        });
-
-        processImageUrls.push(result.secure_url);
+      for (const file of req.files["processImages"]) {
+        const result = await uploadToCloudinary(file.buffer, "artfolio/process");
+        processUrls.push(result.secure_url);
       }
     }
 
-    // SAVE TO DB
     await db.query(
-      "INSERT INTO posts (title, content, image, process_images, created_at) VALUES ($1,$2,$3,$4,$5)",
-      [title, content, mainImageUrl, JSON.stringify(processImageUrls), createdAt]
+      `INSERT INTO posts (title, content, image_url, image_id, process_images, user_id)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [title, content, image_url, image_id, JSON.stringify(processUrls), req.user.id]
     );
 
     res.redirect("/");
-  } catch (error) {
-    console.log(error);
+  } catch (err) {
+    console.error(err);
+    res.redirect("/");
   }
 });
-  
-// Update post
-app.post("/update/:id", upload.fields([
-  { name: "image", maxCount: 1 },
+
+// ── Edit / Update
+app.get("/edit/:id", requireLogin, async (req, res) => {
+  try {
+    const { rows } = await db.query("SELECT * FROM posts WHERE id = $1", [req.params.id]);
+    if (!rows[0]) return res.redirect("/");
+    if (!isOwner(rows[0], req.user)) return res.redirect("/");
+    res.render("edit", { post: rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.redirect("/");
+  }
+});
+
+app.post("/update/:id", requireLogin, upload.fields([
+  { name: "image",         maxCount: 1  },
   { name: "processImages", maxCount: 10 }
 ]), async (req, res) => {
   try {
     const { title, content } = req.body;
     const id = req.params.id;
 
-    // Get existing post
     const { rows } = await db.query("SELECT * FROM posts WHERE id = $1", [id]);
-    if (!rows[0]) return res.redirect("/");
+    if (!rows[0] || !isOwner(rows[0], req.user)) return res.redirect("/");
+
     const existing = rows[0];
+    let image_url = existing.image_url;
+    let image_id  = existing.image_id;
 
-    // Main image
-    let imageUrl = existing.image;
-    let imageId  = existing.image_id;
-
+    // New main image
     if (req.files["image"]) {
-      // Delete old from Cloudinary
-      if (imageId) await cloudinary.uploader.destroy(imageId).catch(() => {});
-
-      const file = req.files["image"][0];
-      const result = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: "artfolio/main" },
-          (error, result) => error ? reject(error) : resolve(result)
-        );
-        stream.end(file.buffer);
-      });
-      imageUrl = result.secure_url;
-      imageId  = result.public_id;
+      if (image_id) await cloudinary.uploader.destroy(image_id).catch(() => {});
+      const result = await uploadToCloudinary(req.files["image"][0].buffer, "artfolio/main");
+      image_url = result.secure_url;
+      image_id  = result.public_id;
     }
 
-    // Process images
-    let processImageUrls = existing.process_images || [];
+    // New process images — 
+    let processUrls = [];
+    try {
+      processUrls = Array.isArray(existing.process_images)
+        ? existing.process_images
+        : JSON.parse(existing.process_images || "[]");
+    } catch { processUrls = []; }
 
     if (req.files["processImages"]) {
-      for (let file of req.files["processImages"]) {
-        const result = await new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            { folder: "artfolio/process" },
-            (error, result) => error ? reject(error) : resolve(result)
-          );
-          stream.end(file.buffer);
-        });
-        processImageUrls.push(result.secure_url);
+      for (const file of req.files["processImages"]) {
+        const result = await uploadToCloudinary(file.buffer, "artfolio/process");
+        processUrls.push(result.secure_url);
       }
     }
 
     await db.query(
-      "UPDATE posts SET title=$1, content=$2, image=$3, image_id=$4, process_images=$5, updated_at=NOW() WHERE id=$6",
-      [title, content, imageUrl, imageId, JSON.stringify(processImageUrls), id]
+      `UPDATE posts SET title=$1, content=$2, image_url=$3, image_id=$4,
+       process_images=$5, updated_at=NOW() WHERE id=$6`,
+      [title, content, image_url, image_id, JSON.stringify(processUrls), id]
     );
 
+    res.redirect(`/posts/${id}`);
+  } catch (err) {
+    console.error(err);
+    res.redirect("/");
+  }
+});
+
+// ── Delete 
+app.post("/delete/:id", requireLogin, async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      "DELETE FROM posts WHERE id = $1 AND user_id = $2 RETURNING image_id",
+      [req.params.id, req.user.id]
+    );
+    if (rows[0]?.image_id) {
+      await cloudinary.uploader.destroy(rows[0].image_id).catch(() => {});
+    }
     res.redirect("/");
   } catch (err) {
     console.error(err);
@@ -252,29 +311,110 @@ app.post("/update/:id", upload.fields([
   }
 });
 
-// Delete post
-app.post("/delete/:id", async (req, res) => {
-  try {
-    const { rows } = await db.query(
-      "DELETE FROM posts WHERE id = $1 RETURNING image_id, process_images",
-      [req.params.id]
-    );
-    // Delete main image from Cloudinary
-    const imageId = rows[0]?.image_id;
-    if (imageId) await cloudinary.uploader.destroy(imageId).catch(() => {});
+// ── Profile 
+app.get("/profile", requireLogin, (req, res) => {
+  res.redirect(`/profile/${req.user.username}`);
+});
 
-    res.redirect("/");
+app.get("/profile/:username", async (req, res) => {
+  try {
+    const { rows: users } = await db.query(
+      "SELECT id, username, email, created_at FROM users WHERE username = $1",
+      [req.params.username]
+    );
+    if (!users[0]) return res.status(404).send("User not found");
+
+    const { rows: posts } = await db.query(
+      `SELECT * FROM posts WHERE user_id = $1 ORDER BY created_at DESC`,
+      [users[0].id]
+    );
+
+    const isOwnProfile = req.user && req.user.username === req.params.username;
+
+    res.render("profile", {
+      profileUser: users[0],
+      posts,
+      isOwnProfile
+    });
   } catch (err) {
     console.error(err);
     res.redirect("/");
   }
+});
+
+// ── Register 
+app.get("/register", (req, res) => {
+  if (req.isAuthenticated()) return res.redirect("/");
+  res.render("register", { error: null });
+});
+
+app.post("/register", async (req, res) => {
+  try {
+    const { username, email, password, confirmPassword } = req.body;
+
+    if (password !== confirmPassword) {
+      return res.render("register", { error: "Passwords do not match." });
+    }
+    if (password.length < 6) {
+      return res.render("register", { error: "Password must be at least 6 characters." });
+    }
+
+    // Check if email or username already taken
+    const { rows: existing } = await db.query(
+      "SELECT id FROM users WHERE email = $1 OR username = $2",
+      [email, username]
+    );
+    if (existing.length > 0) {
+      return res.render("register", { error: "Email or username already taken." });
+    }
+
+    const hash = await bcrypt.hash(password, SALT_ROUNDS);
+
+    const { rows } = await db.query(
+      `INSERT INTO users (username, email, password_hash)
+       VALUES ($1, $2, $3) RETURNING *`,
+      [username, email, hash]
+    );
+
+    // Auto login after register
+    req.login(rows[0], (err) => {
+      if (err) return res.redirect("/login");
+      res.redirect("/");
+    });
+  } catch (err) {
+    console.error(err);
+    res.render("register", { error: "Something went wrong. Try again." });
+  }
+});
+
+// ── Login 
+app.get("/login", (req, res) => {
+  if (req.isAuthenticated()) return res.redirect("/");
+  res.render("login", { error: null });
+});
+
+app.post("/login", (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) return next(err);
+    if (!user) return res.render("login", { error: info.message });
+    req.login(user, (err) => {
+      if (err) return next(err);
+      res.redirect("/");
+    });
+  })(req, res, next);
+});
+
+// ── Logout 
+app.post("/logout", (req, res) => {
+  req.logout((err) => {
+    if (err) return res.redirect("/");
+    res.redirect("/login");
+  });
 });
 
 // 404
-app.use((req, res) => {
-  res.status(404).send("404 - Page Not Found");
-});
+app.use((req, res) => res.status(404).send("404 - Page Not Found"));
 
 app.listen(port, () => {
-  console.log(`Listening on port ${port}`);
+  console.log(`\n🎨  Artfolio running → http://localhost:${port}\n`);
 });
