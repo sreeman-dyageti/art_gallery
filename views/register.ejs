@@ -1,0 +1,60 @@
+<%- include("partials/header") %>
+
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-icon">◆</div>
+            <h1 class="auth-title">Join <em>Artfolio</em></h1>
+            <p class="auth-sub">Create your artist portfolio today</p>
+        </div>
+
+        <% if (error) { %>
+        <div class="auth-error">
+            <i class="fi fi-rr-exclamation"></i> <%= error %>
+        </div>
+        <% } %>
+
+        <form class="auth-form" action="/register" method="POST">
+            <div class="field-group">
+                <label class="field-label">Username</label>
+                <input type="text" name="username"
+                       placeholder="your_artist_name"
+                       required autocomplete="off"
+                       pattern="[a-zA-Z0-9_]{3,20}"
+                       title="3-20 characters, letters, numbers and underscores only">
+            </div>
+
+            <div class="field-group">
+                <label class="field-label">Email</label>
+                <input type="email" name="email"
+                       placeholder="you@example.com"
+                       required autocomplete="off">
+            </div>
+
+            <div class="field-group">
+                <label class="field-label">Password</label>
+                <input type="password" name="password"
+                       placeholder="At least 6 characters"
+                       required minlength="6">
+            </div>
+
+            <div class="field-group">
+                <label class="field-label">Confirm Password</label>
+                <input type="password" name="confirmPassword"
+                       placeholder="Repeat your password"
+                       required minlength="6">
+            </div>
+
+            <button type="submit" class="submit-btn">
+                Create Account
+            </button>
+        </form>
+
+        <p class="auth-switch">
+            Already have an account?
+            <a href="/login">Sign in</a>
+        </p>
+    </div>
+</div>
+
+<%- include("partials/footer") %>
