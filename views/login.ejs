@@ -1,0 +1,44 @@
+<%- include("partials/header") %>
+
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-icon">◆</div>
+            <h1 class="auth-title">Welcome <em>Back</em></h1>
+            <p class="auth-sub">Sign in to your Artfolio account</p>
+        </div>
+
+        <% if (error) { %>
+        <div class="auth-error">
+            <i class="fi fi-rr-exclamation"></i> <%= error %>
+        </div>
+        <% } %>
+
+        <form class="auth-form" action="/login" method="POST">
+            <div class="field-group">
+                <label class="field-label">Email</label>
+                <input type="email" name="email"
+                       placeholder="you@example.com"
+                       required autocomplete="email">
+            </div>
+
+            <div class="field-group">
+                <label class="field-label">Password</label>
+                <input type="password" name="password"
+                       placeholder="Your password"
+                       required>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                Sign In
+            </button>
+        </form>
+
+        <p class="auth-switch">
+            Don't have an account?
+            <a href="/register">Create one</a>
+        </p>
+    </div>
+</div>
+
+<%- include("partials/footer") %>
