@@ -1,0 +1,104 @@
+<%- include("partials/header.ejs") %>
+
+<div class="profile-page">
+
+    <!-- Profile header -->
+    <div class="profile-hero">
+        <div class="profile-avatar">
+            <%= profileUser.username.charAt(0).toUpperCase() %>
+        </div>
+
+        <div class="profile-info">
+            <h1 class="profile-username">@<%= profileUser.username %></h1>
+            <p class="profile-joined">
+                <i class="fi fi-rr-calendar"></i>
+                Joined <%= new Date(profileUser.created_at).toLocaleDateString('en-US', { year:'numeric', month:'long' }) %>
+            </p>
+            <p class="profile-count">
+                <strong><%= posts.length %></strong>
+                <%= posts.length === 1 ? 'artwork' : 'artworks' %> shared
+            </p>
+        </div>
+
+        <% if (isOwnProfile) { %>
+        <div class="profile-actions">
+            <a href="/new" class="btn-primary">
+                <i class="fi fi-rr-plus"></i> New Post
+            </a>
+            <form action="/logout" method="POST">
+                <button type="submit" class="btn-ghost">
+                    <i class="fi fi-rr-sign-out-alt"></i> Logout
+                </button>
+            </form>
+        </div>
+        <% } %>
+    </div>
+
+    <!-- Posts grid -->
+    <% if (posts.length === 0) { %>
+    <div class="profile-empty">
+        <p class="profile-empty-text">
+            <% if (isOwnProfile) { %>
+                You haven't shared any artwork yet.
+                <a href="/new">Create your first post</a>
+            <% } else { %>
+                <%= profileUser.username %> hasn't shared any artwork yet.
+            <% } %>
+        </p>
+    </div>
+    <% } else { %>
+    <div class="pinterest-grid">
+        <% posts.forEach((post, i) => { %>
+        <div class="p-item">
+            <a href="/posts/<%= post.id %>" class="p-img-link">
+                <% if (post.image_url) { %>
+                    <img src="<%= post.image_url %>"
+                         alt="<%= post.title %>"
+                         class="p-img" loading="lazy">
+                <% } else { %>
+                    <div class="p-no-img">
+                        <i class="fi fi-rr-picture"></i>
+                    </div>
+                <% } %>
+                <div class="p-hover">
+                    <%
+                      let stepCount = 0;
+                      try {
+                        const imgs = Array.isArray(post.process_images)
+                          ? post.process_images
+                          : JSON.parse(post.process_images || '[]');
+                        stepCount = imgs.length;
+                      } catch(e) {}
+                    %>
+                    <% if (stepCount > 0) { %>
+                    <span class="p-steps-badge">
+                        <i class="fi fi-rr-layers"></i> <%= stepCount %> steps
+                    </span>
+                    <% } %>
+                </div>
+            </a>
+
+            <div class="p-info">
+                <h3 class="p-title"><%= post.title %></h3>
+            </div>
+
+            <% if (isOwnProfile) { %>
+            <div class="pin-actions">
+                <a href="/edit/<%= post.id %>" class="pin-btn pin-btn-edit">
+                    <i class="fi fi-rr-pencil"></i> Edit
+                </a>
+                <form action="/delete/<%= post.id %>" method="post" class="inline-form">
+                    <button type="submit" class="pin-btn pin-btn-delete">
+                        <i class="fi fi-rr-trash"></i> Delete
+                    </button>
+                </form>
+            </div>
+            <% } %>
+        </div>
+        <% }); %>
+    </div>
+    <% } %>
+
+</div>
+
+<%- include("partials/footer.ejs") %>
