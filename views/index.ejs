@@ -31,7 +31,7 @@
 
 <div class="pinterest-grid" id="pinterestGrid">
     <% posts.forEach((post, i) => { %>
-     <div class="p-item"></div>
+    <div class="p-item">
 
         <a href="/posts/<%= post.id %>" class="p-img-link">
             <% const hasValidImage = post.image && post.image !== 'undefined' && post.image !== 'null'; %>
@@ -41,11 +41,11 @@
                      class="p-img"
                      loading="lazy">
             <% } else { %>
-                <div class="p-no-img">🖼️</div>
+                <div class="p-no-img"><i class="fi fi-rr-picture"></i></div>
             <% } %>
 
             <div class="p-hover">
-                <% 
+                <%
                   let stepCount = 0;
                   try {
                     const imgs = Array.isArray(post.process_images)
@@ -65,9 +65,15 @@
 
         <div class="p-info">
             <h3 class="p-title"><%= post.title %></h3>
+            <% if (post.username) { %>
+            <p class="p-author">by <a href="/profile/<%= post.username %>">@<%= post.username %></a></p>
+            <% } %>
+            <% if (post.content) { %>
             <p class="p-excerpt"><%= post.content %></p>
+            <% } %>
         </div>
 
+        <% if (currentUser && currentUser.id === post.user_id) { %>
         <div class="pin-actions">
             <a href="/edit/<%= post.id %>" class="pin-btn pin-btn-edit">
                 <i class="fi fi-rr-pencil"></i> Edit
@@ -78,6 +84,7 @@
                 </button>
             </form>
         </div>
+        <% } %>
 
     </div>
     <% }); %>

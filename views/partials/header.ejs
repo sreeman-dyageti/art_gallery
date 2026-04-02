@@ -42,16 +42,35 @@
         </div>
     </form>
 
-   <!-- Desktop nav -->
+    <!-- Desktop nav -->
     <nav class="topbar-nav" id="desktopNav">
         <a href="/" class="nav-link">
             <i class="fi fi-rr-home"></i>
             <span>Explore</span>
         </a>
-        <a href="/new" class="nav-link nav-cta">
-            <i class="fi fi-rr-plus"></i>
-            <span>New Post</span>
-        </a>
+
+        <% if (currentUser) { %>
+            <a href="/new" class="nav-link nav-cta">
+                <i class="fi fi-rr-plus"></i>
+                <span>New Post</span>
+            </a>
+            <a href="/profile/<%= currentUser.username %>" class="nav-link nav-avatar">
+                <span class="avatar-circle">
+                    <%= currentUser.username.charAt(0).toUpperCase() %>
+                </span>
+                <span><%= currentUser.username %></span>
+            </a>
+        <% } else { %>
+            <a href="/login" class="nav-link">
+                <i class="fi fi-rr-sign-in-alt"></i>
+                <span>Login</span>
+            </a>
+            <a href="/register" class="nav-link nav-cta">
+                <i class="fi fi-rr-user-add"></i>
+                <span>Register</span>
+            </a>
+        <% } %>
+
         <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
             <span class="toggle-icon">🌙</span>
         </button>
@@ -83,12 +102,34 @@
 </div>
 
 <!-- Mobile menu -->
-<div class="mobile-menu" id="mobileMenu" aria-hidden="true">
-    <nav class="mobile-nav">
-        <a href="/" class="mobile-nav-link"><i class="fi fi-rr-home"></i> Explore Gallery</a>
-        <a href="/new" class="mobile-nav-link mobile-nav-cta"><i class="fi fi-rr-plus"></i> New Post</a>
-    </nav>
-</div>
+    <!-- Mobile nav -->
+    <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+        <nav class="mobile-nav">
+            <a href="/" class="mobile-nav-link">
+                <i class="fi fi-rr-home"></i> Explore Gallery
+            </a>
+            <% if (currentUser) { %>
+                <a href="/new" class="mobile-nav-link">
+                    <i class="fi fi-rr-plus"></i> New Post
+                </a>
+                <a href="/profile/<%= currentUser.username %>" class="mobile-nav-link">
+                    <i class="fi fi-rr-user"></i> My Profile
+                </a>
+                <form action="/logout" method="POST" style="margin:0">
+                    <button type="submit" class="mobile-nav-link mobile-nav-logout">
+                        <i class="fi fi-rr-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            <% } else { %>
+                <a href="/login" class="mobile-nav-link">
+                    <i class="fi fi-rr-sign-in-alt"></i> Login
+                </a>
+                <a href="/register" class="mobile-nav-link mobile-nav-cta">
+                    <i class="fi fi-rr-user-add"></i> Register
+                </a>
+            <% } %>
+        </nav>
+    </div>
 <div class="menu-backdrop" id="menuBackdrop"></div>
 
 <main class="main-content">
