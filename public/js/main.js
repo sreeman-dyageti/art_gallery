@@ -69,7 +69,6 @@ if (textarea && counter) {
         counter.style.color = pct > 0.9 ? "#dc2626" : pct > 0.75 ? "#d97706" : "";
     });
 }
-
 // --- MAIN IMAGE drag & drop ---
 const mainZone    = document.getElementById("mainDropZone");
 const mainInput   = document.getElementById("mainImageInput");
@@ -94,7 +93,10 @@ if (mainInput) {
 
 if (mainZone) {
     ["dragenter", "dragover"].forEach(evt =>
-        mainZone.addEventListener(evt, e => { e.preventDefault(); mainZone.classList.add("drag-over"); })
+        mainZone.addEventListener(evt, e => {
+            e.preventDefault();
+            mainZone.classList.add("drag-over");
+        })
     );
     ["dragleave", "drop"].forEach(evt =>
         mainZone.addEventListener(evt, () => mainZone.classList.remove("drag-over"))
@@ -102,7 +104,8 @@ if (mainZone) {
     mainZone.addEventListener("drop", e => {
         e.preventDefault();
         const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith("image/")) {
+        if (file && file.type.startsWith("image/") && mainInput) {
+            // ← KEY FIX: properly assign file to input
             const dt = new DataTransfer();
             dt.items.add(file);
             mainInput.files = dt.files;

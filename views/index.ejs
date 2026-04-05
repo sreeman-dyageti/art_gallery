@@ -34,9 +34,9 @@
     <div class="p-item">
 
         <a href="/posts/<%= post.id %>" class="p-img-link">
-            <% const hasValidImage = post.image && post.image !== 'undefined' && post.image !== 'null'; %>
-            <% if (hasValidImage) { %>
-                <img src="<%= post.image %>"
+           <% const hasValidImage = post.image_url && post.image_url !== 'undefined' && post.image_url !== 'null'; %>
+              <% if (hasValidImage) { %>
+               <img src="<%= post.image_url %>"
                      alt="<%= post.title %>"
                      class="p-img"
                      loading="lazy">
